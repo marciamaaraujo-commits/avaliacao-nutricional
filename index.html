@@ -1,0 +1,1665 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v5.9 (Local - Final)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); font-size: 14px; background-color: #fff;
+            min-width: 150px;
+        }
+        .form-input-sm { min-width: 80px; width: 80px; }
+        .form-select-sm { min-width: 80px; width: 80px; padding-right: 2rem; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: 2px solid transparent; outline-offset: 2px; border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+        .form-select {
+            background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 12.586l-4.293-4.293a1 1 0 10-1.414 1.414l5 5a1 1 0 001.414 0l5-5a1 1 0 00-1.414-1.414L10 12.586z" clip-rule="evenodd"/></svg>');
+            background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.25em 1.25em;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        }
+        .form-input:disabled, .form-textarea:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        /* Campos Calculados */
+        .calculated { background-color: #eef2ff; color: #3730a3; font-weight: 500; border-color: #c7d2fe; }
+        .score { background-color: #fefce8; color: #a16207; font-weight: 600; border-color: #fde047; }
+        .score-total { background-color: #fecaca; color: #b91c1c; font-weight: 700; border-color: #f87171; }
+        
+        table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; white-space: nowrap; font-size: 14px; vertical-align: top; }
+        thead th {
+            position: -webkit-sticky; position: sticky; top: 0; background-color: #374151; color: white;
+            z-index: 10; text-align: left; font-weight: 600;
+        }
+        
+        /* Cores dos cabeçalhos por seção */
+        th.section-info { background-color: #4338ca; } /* Indigo 700 */
+        th.section-clinic { background-color: #be123c; } /* Rose 700 */
+        th.section-habits { background-color: #059669; } /* Emerald 600 */
+        th.section-anthro { background-color: #7e22ce; } /* Purple 700 */
+        th.section-nrs { background-color: #0d9488; } /* Teal 600 */
+        th.section-asg-ppp { background-color: #d97706; } /* Amber 600 - Cor Laranja */
+        th.section-exam { background-color: #52525b; } /* Zinc 600 */
+        th.section-final { background-color: #0284c7; } /* Sky 600 */
+
+        /* Coluna Fixa */
+        th.sticky-col, td.sticky-col {
+            position: -webkit-sticky; position: sticky; left: 0; z-index: 5;
+        }
+        th.sticky-col { z-index: 15; }
+        th.sticky-col-action { left: 173px; } /* Ajuste baseado na largura da primeira coluna */
+        td.sticky-col { background-color: #ffffff; }
+        tbody tr:nth-child(even) td.sticky-col { background-color: #f9fafb; }
+        tbody tr:hover td.sticky-col { background-color: #f0f9ff; }
+
+        .table-container {
+            width: 100%; overflow-x: auto; border: 1px solid #d1d5db;
+            border-radius: 8px; margin-top: 20px; max-height: 70vh; overflow-y: auto;
+        }
+        .symptom-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; min-width: 300px; }
+        .symptom-item { display: flex; justify-content: space-between; align-items: center; }
+        .symptom-item label { font-size: 13px; margin-right: 5px; }
+
+        /* Colunas condicionais */
+        .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell { display: none; }
+        
+        /* Grid para N.2 Doenças e Tratamentos */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px 12px;
+            min-width: 350px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        .checkbox-item label {
+            font-size: 13px;
+            white-space: normal;
+        }
+        
+        /* Botão de Impressão por Linha */
+        .print-row-btn {
+            padding: 4px 8px;
+            font-size: 16px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .print-row-btn:hover { background-color: #0369a1; }
+
+        /* --- Estilos do Modal de Estatísticas --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 99;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 8px;
+            width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto;
+        }
+        .modal-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-top: 20px;
+        }
+        .stat-card {
+            background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;
+        }
+        .stat-title { font-size: 14px; font-weight: 500; color: #374151; }
+        .stat-value { font-size: 24px; font-weight: 700; color: #4338ca; margin-top: 5px; }
+        .stat-list { list-style: none; padding-left: 0; }
+        .stat-list li { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+        .stat-list li span { font-weight: 600; }
+        
+    </style>
+    
+    <style>
+        @media print {
+            body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; background-color: #fff;
+            }
+            .no-print { display: none !important; }
+            .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell { display: table-cell !important; } /* Mostrar tudo ao imprimir */
+            .print-container { 
+                width: 210mm; height: 297mm; margin: 0 auto; padding: 15mm; 
+                box-sizing: border-box; font-size: 11pt;
+            }
+            .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .print-header h1 { font-size: 18pt; margin: 0; }
+            .print-header p { font-size: 12pt; margin: 5px 0 0 0; }
+            .print-section { margin-top: 15px; }
+            .print-section h2 { 
+                font-size: 14pt; border-bottom: 1px solid #ccc; padding-bottom: 3px; 
+                margin-top: 20px; margin-bottom: 10px;
+            }
+            .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 15px; }
+            .grid-3-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 15px; }
+            .info-item { margin-bottom: 10px; border-bottom: 1px dotted #eee; padding-bottom: 5px; }
+            .info-label { font-size: 10pt; color: #333; }
+            .info-value { font-size: 13pt; font-weight: bold; color: #000; }
+            .info-value-sm { font-size: 11pt; font-weight: normal; }
+            .highlight-risk-nrs { 
+                background-color: #fff0f0 !important; border: 2px solid #b91c1c !important; 
+                padding: 10px; margin-top: 10px; border-radius: 4px;
+            }
+            .highlight-risk-pgsga { 
+                background-color: #fffbe5 !important; border: 2px solid #d97706 !important; 
+                padding: 10px; margin-top: 10px; border-radius: 4px;
+            }
+            .highlight-risk-nrs h3, .highlight-risk-pgsga h3 { 
+                margin: 0 0 5px 0; font-size: 13pt; color: #b91c1c;
+            }
+            .highlight-risk-pgsga h3 { color: #d97706; }
+            .recommendations {
+                margin-top: 15px; border: 1px solid #777; padding: 10px;
+                min-height: 100px; background: #fdfdfd;
+            }
+            /* Esconde o campo de texto do Dx no print, mostra o conteúdo */
+            .form-textarea[data-calc-target="dxNutricional"] { 
+                display: block; 
+                border: none; 
+                background: #fdfdfd !important; 
+                color: #000 !important; 
+                font-size: 11pt; 
+                height: auto;
+                min-height: 50px;
+                white-space: pre-wrap !important;
+            }
+            .form-textarea[data-col="Plano Nutricional"], .form-textarea[data-col="Escreva aqui o seu Diagnóstico Nutricional"] {
+                display: block;
+                border: none;
+                background: #fdfdfd !important;
+                color: #000 !important;
+                font-size: 11pt;
+                height: auto;
+                min-height: 50px;
+                white-space: pre-wrap !important;
+            }
+        }
+    </style></head><body class="p-6 md:p-10">
+    <div class="max-w-full mx-auto no-print">
+        <h1 class="text-3xl font-bold text-gray-800">Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP)</h1>
+        <p class="mt-2 text-gray-600">Preencha os campos abaixo. Os campos coloridos são calculados automaticamente.</p>
+        <p class="mt-1 text-sm text-indigo-600 font-medium">Use a barra de scroll horizontal ↔ na tabela para ver todos os campos.</p>
+        <p class="mt-1 text-sm text-rose-600 font-medium">**Selecione o "Setor" para mostrar/ocultar os campos de Oncologia (ASG-PPP).**</p>
+
+
+        <div class="mt-6 space-x-3">
+            <button id="addRow" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                + Adicionar Paciente
+            </button>
+            <button id="exportCSV" class="px-5 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                Exportar para CSV
+            </button>
+            <button id="showDashboard" class="px-5 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                📊 Ver Estatísticas
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="section-info sticky-col">Estagiário</th>
+                        <th class="section-info sticky-col sticky-col-action">Ações</th>
+                        <th class="section-info">Setor</th>
+                        <th class="section-info">Data da Avaliação</th>
+                        <th class="section-info">Nome/Iniciais</th>
+                        <th class="section-info">Admissão</th>
+                        <th class="section-info">Data de Nasc.</th>
+                        <th class="section-info">Idade</th>
+                        <th class="section-info">Gênero</th>
+                        <th class="section-info">Leito</th>
+                        <th class="section-info dx-motivo-cell">Motivo da Internação</th>
+                        <th class="section-info dx-onco-cell">Diagnóstico Médico</th>
+                        <th class="section-info">Acompanhante</th>
+                        <th class="section-info">Parentesco</th>
+                        
+                        <th class="section-asg-ppp asg-ppp-cell">Tratamentos realizados</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Tratamento Atual</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Cirurgia</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Ciclos (nº)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Seções (nº)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Freq. (Trat.)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">Nº Sessão Atual</th>
+                        <th class="section-clinic">Comorb: DM</th>
+                        <th class="section-clinic">Comorb: Dislipidemia</th>
+                        <th class="section-clinic">Comorb: HAS</th>
+                        <th class="section-clinic">Comorb: AVC</th>
+                        <th class="section-clinic">Comorb: Cardiopata</th>
+                        <th class="section-clinic">Comorb: Nefropata</th>
+                        <th class="section-clinic">Comorb: Outros</th>
+                        
+                        <th class="section-clinic">Faz uso de Meds?</th>
+                        <th class="section-clinic">Medicamentos (Separar por vírgula)</th>
+                        <th class="section-clinic">Fumante?</th>
+                        <th class="section-clinic">Fumante (Tempo)</th>
+                        <th class="section-clinic">Ex-fumante (Tempo)</th>
+                        <th class="section-clinic asg-ppp-cell">Suplementação (ASG-PPP)</th>
+
+                        <th class="section-habits">Dieta Atual</th>
+                        <th class="section-habits">Altera. Mastig/Deglut.</th>
+                        <th class="section-habits non-onco-cell">Descrição (Mastig/Deglut.)</th>
+                        <th class="section-habits">H.U. Escala</th>
+                        <th class="section-habits">H.U. Cor</th>
+                        <th class="section-habits">H.U. Frequência</th>
+                        <th class="section-habits">H.U. Dor?</th>
+                        <th class="section-habits">H.U. Odor?</th>
+                        <th class="section-habits">H.I. Escala (Bristol)</th>
+                        <th class="section-habits">Bolsa de Colostomia?</th>
+                        <th class="section-habits">H.I. Cor</th>
+                        <th class="section-habits">H.I. Frequência</th>
+                        <th class="section-habits">Via de Alimentação</th>
+                        <th class="section-habits">Tempo Via Enteral</th>
+                        <th class="section-habits">Obs. Alimentação</th>
+                        <th class="section-habits">Informações Extras</th>
+                        <th class="section-habits">Cond. Funcional Anterior</th>
+                        <th class="section-habits">Cond. Funcional Atual</th>
+                        <th class="section-habits">Dia Alimentar Habitual</th>
+                        <th class="section-habits">Aceitação Dieta Hosp. (%)</th>
+                        <th class="section-habits">Ingestão Hídrica (L/dia)</th>
+                        
+                        <th class="section-asg-ppp asg-ppp-cell">P.2 a) Ingestão (Habitual)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">P.2 b) Ingestão (Atual)</th>
+                        
+                        <th class="section-anthro">Altura (m)</th>
+                        <th class="section-anthro">Peso Atual (kg)</th>
+                        <th class="section-anthro">Peso Habitual (kg)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">P.1: costumava pesar há 1 mês</th>
+                        <th class="section-asg-ppp asg-ppp-cell">P.1: costumava pesar há 6 meses</th>
+                        <th class="section-anthro asg-ppp-cell">% Perda 1M</th>
+                        <th class="section-anthro asg-ppp-cell">% Perda 6M</th>
+                        <th class="section-asg-ppp asg-ppp-cell">P.1 a) Peso (2 sem.)</th>
+                        <th class="section-anthro">CB (cm)</th>
+                        <th class="section-anthro">CP (cm)</th>
+                        <th class="section-anthro">AJ (cm)</th>
+                        <th class="section-anthro">Altura Estimada (m)</th>
+                        <th class="section-anthro">CB Ajustada (cm)</th>
+                        <th class="section-anthro">CP Ajustada (cm)</th>
+                        <th class="section-anthro">IMC (kg/m²)</th>
+                        <th class="section-anthro">Classificação IMC</th>
+                        
+                        <th class="section-nrs nrs-cell">NRS: Estado Nutricional</th>
+                        <th class="section-nrs nrs-cell">NRS: Gravidade Doença</th>
+                        <th class="section-nrs nrs-cell">NRS: Idade ≥ 70 anos</th>
+                        <th class="section-nrs nrs-cell">NRS: Score Total</th>
+                        <th class="section-nrs nrs-cell">NRS: Risco Nutricional (≥3)</th>
+                        <th class="section-nrs">Nível de Atenção (NAN)</th>
+                        
+                        <th class="section-asg-ppp asg-ppp-cell">P.3: SINTOMAS</th>
+                        <th class="section-asg-ppp asg-ppp-cell">P.4: Atividades e função</th>
+                        <th class="section-asg-ppp asg-ppp-cell">ASG-PPP Score (P1-P4)</th>
+                        <th class="section-asg-ppp asg-ppp-cell">N.1: Pontuação Perda de Peso</th>
+                        <th class="section-asg-ppp asg-ppp-cell">N.2: Doenças (Score)</th>
+                        
+                        <th class="section-asg-ppp asg-ppp-cell">N.3: Febre</th>
+                        <th class="section-asg-ppp asg-ppp-cell">N.3: Duração Febre</th>
+                        <th class="section-asg-ppp asg-ppp-cell">N.3: Corticosteroides</th>
+                        <th class="section-asg-ppp asg-ppp-cell">N.3: Score Demanda Metab.</th>
+                        
+                        <th class="section-exam">N.4 Ex. Físico (Geral): Ascite</th>
+                        <th class="section-exam">N.4 Ex. Físico (Geral): Turgor Cutâneo</th>
+                        <th class="section-exam">N.4 Ex. Físico (Geral): Cabelo</th>
+                        <th class="section-exam">N.4 Olhos (Conjuntiva/Achados/Córnea)</th>
+                        <th class="section-exam">N.4 TEC (s)</th>
+                        <th class="section-exam">N.4 Edema: Região</th>
+                        <th class="section-exam">N.4 Edema: Lado</th>
+                        <th class="section-exam">N.4 Edema: Grau (Godet)</th>
+                        <th class="section-exam asg-ppp-cell">N.4 Ex. Físico (ASG-PPP): Campos (0-3+)</th>
+                        <th class="section-exam asg-ppp-cell">N.4: Score Ex. Físico</th>
+                        
+                        <th class="section-final">Fator Calórico (kcal/kg)</th>
+                        <th class="section-final">Meta Calórica (kcal/dia)</th>
+                        <th class="section-final">Fator Proteico (g/kg)</th>
+                        <th class="section-final">Meta Proteica (g/dia)</th>
+                        <th class="section-final">Fator Hídrico (mL/kg)</th>
+                        <th class="section-final">Meta Hídrica (L/dia)</th>
+                        <th class="section-final">Ref. Hídrica 30mL/kg (L)</th>
+                        <th class="section-final">Ref. Hídrica 35mL/kg (L)</th>
+                        <th class="section-final asg-ppp-cell">ASG-PPP Score Total (N1-N4)</th>
+                        <th class="section-final asg-ppp-cell">ASG-PPP Avaliação Global (A/B/C)</th>
+                        <th class="section-final asg-ppp-cell">ASG-PPP Triagem (Recomendação)</th>
+                        <th class="section-final">Recomendações/Conduta</th>
+                        
+                        <th class="section-final">PES</th>
+                        <th class="section-final">Escreva aqui o seu Diagnóstico Nutricional</th>
+                        <th class="section-final">Plano Nutricional</th>
+                        
+                        <th class="section-final asg-ppp-cell">Pontuação Total (Final)</th>
+                        <th class="section-final asg-ppp-cell">Avaliação Global (Final)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr id="rowTemplate" class="patient-row" style="display: none;">
+                        <td class="sticky-col"><input type="text" class="form-input" data-col="Estagiário"></td>
+                        <td class="sticky-col sticky-col-action"><button class="print-row-btn no-print">🖨️ A4</button></td>
+                        <td>
+                            <select class="form-select" data-col="Setor" data-calc="setor">
+                                <option value="">Selecione...</option>
+                                <option value="Observação">Observação</option>
+                                <option value="P. Barreto">P. Barreto</option>
+                                <option value="Neuro P. Barreto">Neuro P. Barreto</option>
+                                <option value="Amb. Onco">Amb. Onco</option>
+                                <option value="Obs. Onco">Obs. Onco</option>
+                                <option value="Augusto Bianchi">Augusto Bianchi</option>
+                                <option value="EIC - A">EIC - A</option>
+                                <option value="EIC - B">EIC - B</option>
+                                <option value="Santa Casa">Santa Casa</option>
+                                <option value="Tinoco Cabral">Tinoco Cabral</option>
+                                <option value="Edgar Cajado">Edgar Cajado</option>
+                                <option value="UTI">UTI</option>
+                                <option value="CTI I">CTI I</option>
+                                <option value="CTI II">CTI II</option>
+                                <option value="Politrauma">Politrauma</option>
+                                <option value="Pediatria">Pediatria</option>
+                                <option value="Alojamento Conjunto">Alojamento Conjunto</option>
+                            </select>
+                        </td>
+                        <td><input type="date" class="form-input" data-col="Data da Avaliação"></td>
+                        <td><input type="text" class="form-input" data-col="Nome/Iniciais"></td>
+                        <td><input type="date" class="form-input" data-col="Admissão"></td>
+                        <td><input type="date" class="form-input" data-col="Data de Nasc." data-calc="all"></td>
+                        <td><input type="text" class="form-input calculated" data-col="Idade" data-calc-target="idade" readonly></td>
+                        <td>
+                            <select class="form-select" data-col="Gênero" data-calc="all">
+                                <option value="">Selecione...</option>
+                                <option value="Feminino">Feminino</option>
+                                <option value="Masculino">Masculino</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="Leito"></td>
+                        
+                        <td class="dx-motivo-cell"> 
+                            <input type="text" class="form-input" data-col="Motivo da Internação" list="dx-list">
+                        </td>
+                        <td class="dx-onco-cell"> 
+                             <select class="form-select" data-col="Diagnóstico Médico (Onco)" style="white-space: normal;">
+                                <option value="">Selecione...</option>
+                                <option value="CA Mama">CA Mama</option>
+                                <option value="CA Pulmão">CA Pulmão</option>
+                                <option value="CA Cólon">CA Cólon</option>
+                                <option value="CA Útero">CA Útero</option>
+                                <option value="CA Próstata">CA Próstata</option>
+                                <option value="CA Estômago">CA Estômago</option>
+                                <option value="CA Intestino">CA Intestino</option>
+                                <option value="CA Fígado">CA Fígado</option>
+                                <option value="CA Pele (melanona)">CA Pele (melanona)</option>
+                                <option value="Linfoma">Linfoma</option>
+                                <option value="Leucemia">Leucemia</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </td>
+
+                        <td><input type="text" class="form-input" data-col="Acompanhante"></td>
+                        <td>
+                            <select class="form-select" data-col="Parentesco">
+                                <option value="">Selecione...</option>
+                                <option value="Cônjuge">Cônjuge</option>
+                                <option value="Filho(a)">Filho(a)</option>
+                                <option value="Pai/Mãe">Pai/Mãe</option>
+                                <option value="Irmão(ã)">Irmão(ã)</option>
+                                <option value="Outro">Outro</option>
+                                <option value="Nenhum">Nenhum</option>
+                            </select>
+                        </td>
+                        
+                        <td class="asg-ppp-cell">
+                            <div class="checkbox-grid" style="min-width: 150px;">
+                                <div class="checkbox-item"><input type="checkbox" id="cb-qt-realizado-1" data-col="Trat. Realizado: QT"><label for="cb-qt-realizado-1">QT</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-rt-realizado-1" data-col="Trat. Realizado: RT"><label for="cb-rt-realizado-1">RT</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-imuno-realizado-1" data-col="Trat. Realizado: Imuno"><label for="cb-imuno-realizado-1">Imuno</label></div>
+                            </div>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <div class="checkbox-grid" style="min-width: 150px;">
+                                <div class="checkbox-item"><input type="checkbox" id="cb-qt-atual-1" data-col="Trat. Atual: QT"><label for="cb-qt-atual-1">QT</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-rt-atual-1" data-col="Trat. Atual: RT"><label for="cb-rt-atual-1">RT</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-imuno-atual-1" data-col="Trat. Atual: Imuno"><label for="cb-imuno-atual-1">Imuno</label></div>
+                            </div>
+                        </td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input" data-col="Cirurgia" placeholder="Descreva..."></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input form-input-sm" data-col="Ciclos (nº)"></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input form-input-sm" data-col="Seções (nº)"></td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input" data-col="Freq. (Trat.)"></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input form-input-sm" data-col="Nº Sessão Atual"></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: DM"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: Dislipidemia"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: HAS"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: AVC"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: Cardiopata"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="Comorb: Nefropata"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><input type="text" class="form-input" data-col="Comorb: Outros" list="comorb-list"></td>
+                        
+                        <td>
+                            <select class="form-select form-select-sm" data-col="Faz uso de Meds?">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="Medicamentos em Uso" disabled></td> 
+                        
+                        <td>
+                            <select class="form-select" data-col="Fumante?">
+                                <option value="">Selecione...</option>
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                                <option value="Ex-fumante">Ex-fumante</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="Fumante (Tempo)"></td>
+                        <td><input type="text" class="form-input" data-col="Ex-fumante (Tempo)"></td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input" data-col="Suplementação (ASG-PPP)" placeholder="Qual/posologia"></td>
+
+                        <td>
+                            <select class="form-select" data-col="Dieta Atual">
+                                <option value="">Selecione...</option>
+                                <option value="Geral">Geral</option>
+                                <option value="Branda">Branda</option>
+                                <option value="Pastosa">Pastosa</option>
+                                <option value="Líquida">Líquida</option>
+                                <option value="Enteral">Enteral</option>
+                                <option value="Parenteral">Parenteral</option>
+                                <option value="Jejum">Jejum</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="Altera. Mastig/Deglut.">
+                                <option value="">Selecione...</option>
+                                <option value="Nenhuma">Nenhuma</option>
+                                <option value="Mastigação dificultada">Mastigação dificultada</option>
+                                <option value="Disfagia">Disfagia</option>
+                                <option value="Alimentação exclusiva por sonda">Alimentação exclusiva por sonda</option>
+                                <option value="Outra">Outra</option>
+                            </select>
+                        </td>
+                        <td class="non-onco-cell"><input type="text" class="form-input" data-col="Descrição (Mastig/Deglut.)"></td>
+                        <td>
+                            <select class="form-select" data-col="H.U. Escala">
+                                <option value="">Selecione...</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Oligúria">Oligúria</option>
+                                <option value="Anúria">Anúria</option>
+                                <option value="Poliúria">Poliúria</option>
+                                <option value="Incontinência">Incontinência</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="H.U. Cor"></td>
+                        <td><input type="text" class="form-input" data-col="H.U. Frequência"></td>
+                        <td><select class="form-select form-select-sm" data-col="H.U. Dor?"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td><select class="form-select form-select-sm" data-col="H.U. Odor?"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
+                        <td>
+                            <select class="form-select" data-col="H.I. Escala (Bristol)">
+                                <option value="">Selecione...</option>
+                                <option value="Tipo 1">Tipo 1 (caroços duros)</option>
+                                <option value="Tipo 2">Tipo 2 (forma de salsicha, noduloso)</option>
+                                <option value="Tipo 3">Tipo 3 (forma de salsicha, com fendas)</option>
+                                <option value="Tipo 4">Tipo 4 (forma de salsicha, macio)</option>
+                                <option value="Tipo 5">Tipo 5 (bolas macias)</option>
+                                <option value="Tipo 6">Tipo 6 (pastoso)</option>
+                                <option value="Tipo 7">Tipo 7 (líquido)</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm" data-col="Bolsa de Colostomia?">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="H.I. Cor"></td>
+                        <td>
+                            <select class="form-select" data-col="H.I. Frequência">
+                                <option value="">Selecione...</option>
+                                <option value="Diário">Diário</option>
+                                <option value="A cada 2-3 dias">A cada 2-3 dias</option>
+                                <option value="A cada 1 semana">A cada 1 semana</option>
+                                <option value="Não está evacuando">Não está evacuando</option>
+                                <option value="Proced. clister">Proced. clister</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="Via de Alimentação">
+                                <option value="">Selecione...</option>
+                                <option value="Oral">Oral</option>
+                                <option value="Enteral - Sonda">Enteral - Sonda</option>
+                                <option value="Enteral - Ostomia">Enteral - Ostomia</option>
+                                <option value="Parenteral">Parenteral</option>
+                                <option value="Mista (Oral + Enteral)">Mista (Oral + Enteral)</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="Tempo Via Enteral"></td>
+                        <td><input type="text" class="form-input" data-col="Obs. Alimentação"></td>
+                        <td><input type="text" class="form-input" data-col="Informações Extras"></td>
+                        <td>
+                            <select class="form-select" data-col="Cond. Funcional Anterior">
+                                <option value="">Selecione...</option>
+                                <option value="Ativo (Ativ. Física regular)">Ativo (Ativ. Física regular)</option>
+                                <option value="Independente nas AVDs">Independente nas AVDs</option>
+                                <option value="Deambula mas restrito">Deambula mas restrito</option>
+                                <option value="Dependente de auxílio">Dependente de auxílio</option>
+                                <option value="Acamado">Acamado</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="Cond. Funcional Atual">
+                                <option value="">Selecione...</option>
+                                <option value="Acamado">Acamado</option>
+                                <option value="Ativo no leito">Ativo no leito</option>
+                                <option value="Deambula com auxílio">Deambula com auxílio</option>
+                                <option value="Deambula sem dificuldade">Deambula sem dificuldade</option>
+                                <option value="Cadeira de rodas">Cadeira de rodas</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input" data-col="Dia Alimentar Habitual"></td>
+                        <td><input type="number" class="form-input" data-col="Aceitação Dieta Hosp. (%)" min="0" max="100"></td>
+                        <td><input type="number" class="form-input" data-col="Ingestão Hídrica (L/dia)" step="0.1"></td>
+                        
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="ASG-PPP: P.2 a) Ingestão (Habitual)" data-calc="asg_ppp_p" style="white-space: normal;">
+                                <option value="0">A mesma coisa (0)</option>
+                                <option value="0">Mais que o habitual (0)</option>
+                                <option value="1">Menos que o habitual (1)</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="ASG-PPP: P.2 b) Ingestão (Atual)" data-calc="asg_ppp_p" style="white-space: normal; min-width: 280px;">
+                                <option value="0">Mesma comida (sólida) menor qtde (0)</option>
+                                <option value="1">Mesma comida (sólida) em pouca qtde (1)</option>
+                                <option value="2">Apenas alim. Liq. (2)</option>
+                                <option value="3">Muito pouca qtde de qq alim. (3)</option>
+                                <option value="4">Apenas alim. Por sonda ou veia (4)</option>
+                            </select>
+                        </td>
+                        
+                        <td><input type="number" class="form-input form-input-sm" data-col="Altura (m)" step="0.01" data-calc="all"></td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="Peso Atual (kg)" step="0.1" data-calc="all"></td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="Peso Habitual (kg)" step="0.1" data-calc="all"></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input form-input-sm" data-col="Peso 1 Mês (kg)" step="0.1" data-calc="all"></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input form-input-sm" data-col="Peso 6 Meses (kg)" step="0.1" data-calc="all"></td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated form-input-sm" data-col="% Perda 1M" data-calc-target="perda1m" readonly></td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated form-input-sm" data-col="% Perda 6M" data-calc-target="perda6m" readonly></td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="ASG-PPP: P.1 a) Peso (2 sem.)" data-calc="asg_ppp_p">
+                                <option value="0">Ficou igual (0)</option>
+                                <option value="0">Aumentou (0)</option>
+                                <option value="1">Diminuiu (1)</option>
+                            </select>
+                        </td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="CB (cm)" step="0.1" data-calc="all"></td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="CP (cm)" step="0.1" data-calc="all"></td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="AJ (cm)" step="0.1" data-calc="all"></td>
+                        <td><input type="number" class="form-input form-input-sm calculated" data-col="Altura Estimada (m)" step="0.01" data-calc-target="alturaEstimada" readonly></td>
+                        <td><input type="text" class="form-input calculated form-input-sm" data-col="CB Ajustada (cm)" data-calc-target="cbAjustada" readonly></td>
+                        <td><input type="text" class="form-input calculated form-input-sm" data-col="CP Ajustada (cm)" data-calc-target="cpAjustada" readonly></td>
+                        <td><input type="text" class="form-input calculated form-input-sm" data-col="IMC (kg/m²)" data-calc-target="imc" readonly></td>
+                        <td><input type="text" class="form-input calculated" data-col="Classificação IMC" data-calc-target="classIMC" readonly></td>
+                        
+                        <td class="nrs-cell">
+                            <select class="form-select" data-col="NRS: Estado Nutricional" data-calc="nrs">
+                                <option value="0">0: Normal</option>
+                                <option value="1">1: Perda >5%/3m OU ingestão 50-75% habitual</option>
+                                <option value="2">2: Perda >5%/2m OU IMC 18.5-20.5 + cond. prejud. OU ingestão 20-60%</option>
+                                <option value="3">3: Perda >5%/1m (>15%/3m) OU IMC <18.5 + cond. prejud. OU ingestão 0-25%</option>
+                            </select>
+                        </td>
+                        <td class="nrs-cell">
+                            <select class="form-select" data-col="NRS: Gravidade Doença" data-calc="nrs">
+                                <option value="0">0: Requisitos normais</option>
+                                <option value="1">1: Fratura quadril; Crônicos (Cirrose, DPOC, HD, DM, Onco)</option>
+                                <option value="2">2: Cirurgia maior (abd); AVE; Pneumonia grave; Neo. hematológica</option>
+                                <option value="3">3: TCE; TMO; UTI (APACHE >10)</option>
+                            </select>
+                        </td>
+                        <td class="nrs-cell"><input type="text" class="form-input calculated" data-col="NRS: Idade ≥ 70 anos" data-calc-target="nrsIdade" readonly></td>
+                        <td class="nrs-cell"><input type="text" class="form-input calculated" data-col="NRS: Score Total" data-calc-target="nrsTotal" readonly></td>
+                        <td class="nrs-cell"><input type="text" class="form-input calculated" data-col="NRS: Risco Nutricional (≥3)" data-calc-target="nrsRisco" readonly></td>
+                        <td>
+                            <select class="form-select" data-col="Nível de Atenção (NAN)">
+                                <option value="">Selecione...</option>
+                                <option value="Primário">Primário</option>
+                                <option value="Secundário">Secundário</option>
+                                <option value="Terciário">Terciário</option>
+                            </select>
+                        </td>
+                        
+                        <td class="asg-ppp-cell">
+                            <div class="symptom-grid" style="min-width: 350px;">
+                                <div class="symptom-item"><label>Náusea</label><select class="form-select form-select-sm" data-col="Sintoma: Náusea"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Vômito</label><select class="form-select form-select-sm" data-col="Sintoma: Vômito"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Obstipação</label><select class="form-select form-select-sm" data-col="Sintoma: Obstipação"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Diarreia</label><select class="form-select form-select-sm" data-col="Sintoma: Diarreia"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Boca Seca</label><select class="form-select form-select-sm" data-col="Sintoma: Boca Seca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Saciedade</label><select class="form-select form-select-sm" data-col="Sintoma: Saciedade"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Gosto Alterado</label><select class="form-select form-select-sm" data-col="Sintoma: Gosto Alterado"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Dificuldade para engolir</label><select class="form-select form-select-sm" data-col="Sintoma: P. Engolir"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Cheiro Incomoda</label><select class="form-select form-select-sm" data-col="Sintoma: Cheiro Incomoda"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Cansaço</label><select class="form-select form-select-sm" data-col="Sintoma: Cansaço"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Feridas Boca</label><select class="form-select form-select-sm" data-col="Sintoma: Feridas Boca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Sem Apetite</label><select class="form-select form-select-sm" data-col="Sintoma: Sem Apetite"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item"><label>Dor</label><select class="form-select form-select-sm" data-col="Sintoma: Dor"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="symptom-item" style="grid-column: 1 / -1;"><input type="text" class="form-input" data-col="ASG-PPP: Outros Sintomas" placeholder="Outros:"></div>
+                            </div>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="ASG-PPP: P.4: Atividades e função" data-calc="asg_ppp_p" style="white-space: normal; min-width: 250px;">
+                                <option value="0">Normal, sem nenhuma limitação (0)</option>
+                                <option value="1">Não totalmente normal, mas capaz de manter quase todas as atividades normais (1)</option>
+                                <option value="2">Sem disposição para a maioria das coisas, mas ficando na cama ou na cadeira menos da metade do dia (2)</option>
+                                <option value="3">Capaz de fazer pouca atividade e passando a maior parte do dia na cadeira ou na cama (3)</option>
+                                <option value="4">Praticamente acamado, raramente fora da cama (4)</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input score form-input-sm calculated" data-col="ASG-PPP Score (P1-P4)" data-calc-target="scoreP1_P4" readonly></td>
+                        <td class="asg-ppp-cell"><input type="number" class="form-input score form-input-sm calculated" data-col="N.1: Pontuação Perda de Peso" data-calc-target="scoreN1" readonly></td>
+                        
+                        <td class="asg-ppp-cell">
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="cb-cancer-1" data-col="Doença: Câncer" data-calc="asg_ppp_n2"><label for="cb-cancer-1">Câncer</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-aids-1" data-col="Doença: AIDS" data-calc="asg_ppp_n2"><label for="cb-aids-1">AIDS</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-caquexia-1" data-col="Doença: Caquexia (Card/Pulm)" data-calc="asg_ppp_n2"><label for="cb-caquexia-1">Caquexia (Card/Pulm)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-ulcera-1" data-col="Doença: Úlcera/Ferida" data-calc="asg_ppp_n2"><label for="cb-ulcera-1">Úlcera/Ferida</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-trauma-1" data-col="Doença: Trauma" data-calc="asg_ppp_n2"><label for="cb-trauma-1">Trauma</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-irc-1" data-col="Doença: IRC" data-calc="asg_ppp_n2"><label for="cb-irc-1">IRC</label></div>
+                                <div class="disease-item" style="grid-column: 1 / -1; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
+                                    <input type="text" class="form-input calculated" data-col="Doença: Idade >65 (Auto)" data-calc-target="idade65" readonly>
+                                </div>
+                                <input type="text" class="form-input calculated score" data-col="N.2: Doenças (Score)" data-calc-target="scoreN2" readonly>
+                            </div>
+                        </td>
+                        
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="N.3: Febre" data-calc="asg_ppp_n3">
+                                <option value="0">Sem febre (0)</option>
+                                <option value="1">>37,2 e <38,3 (1)</option>
+                                <option value="2">≥38,3 e <38,9 (2)</option>
+                                <option value="3">≥38,9 (3)</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select" data-col="N.3: Duração Febre" data-calc="asg_ppp_n3">
+                                <option value="0">Sem febre (0)</option>
+                                <option value="1"><72 horas (1)</option>
+                                <option value="2">72 horas (2)</option>
+                                <option value="3">>72 horas (3)</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell">
+                             <select class="form-select" data-col="N.3: Corticosteroides" data-calc="asg_ppp_n3">
+                                <option value="0">Sem (0)</option>
+                                <option value="1">Dose baixa <10mg (1)</option>
+                                <option value="2">Dose mod. ≥10 a <30mg (2)</option>
+                                <option value="3">Dose elevada ≥30mg (3)</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <input type="text" class="form-input calculated score" data-col="N.3: Score Demanda Metab." data-calc-target="scoreN3" readonly>
+                        </td>
+                        
+                        <td><select class="form-select" data-col="N.4 Ex. Físico (Geral): Ascite"><option value="Ausente">Ausente</option><option value="Presente">Presente</option></select></td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Ex. Físico (Geral): Turgor Cutâneo">
+                                <option value="">Selecione...</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Diminuído">Diminuído</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Ex. Físico (Geral): Cabelo">
+                                <option value="">Selecione...</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Fino">Fino</option>
+                                <option value="Quebradiço">Quebradiço</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Olhos (Conjuntiva/Achados/Córnea)" style="white-space: normal; min-width: 200px;">
+                                <option value="">Selecione...</option>
+                                <option value="Conjuntiva rósea">Conjuntiva rósea</option>
+                                <option value="Conjuntiva pálida">Conjuntiva pálida</option>
+                                <option value="Xeroftalmia">Xeroftalmia</option>
+                                <option value="Manchas de Bitot">Manchas de Bitot</option>
+                                <option value="Córnea íntegra">Córnea íntegra</option>
+                                <option value="Córnea opaca">Córnea opaca</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm" data-col="N.4 TEC (s)">
+                                <option value="">...</option>
+                                <option value="<3s">< 3s</option>
+                                <option value=">3s">> 3s</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Edema: Região">
+                                <option value="">Selecione...</option>
+                                <option value="Ausente">Ausente</option>
+                                <option value="MMII">MMII</option>
+                                <option value="MMSS">MMSS</option>
+                                <option value="Sacro">Sacro</option>
+                                <option value="Periorbitário">Periorbitário</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Edema: Lado">
+                                <option value="">Selecione...</option>
+                                <option value="N/A">N/A</option>
+                                <option value="Direita">Direita</option>
+                                <option value="Esquerda">Esquerda</option>
+                                <option value="Bilateral">Bilateral</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-select" data-col="N.4 Edema: Grau (Godet)">
+                                <option value="">Selecione...</option>
+                                <option value="Ausente">Ausente</option>
+                                <option value="NP (não-pitting)">NP (não-pitting)</option>
+                                <option value="1+">+ (1+)</option>
+                                <option value="2+">++ (2+)</option>
+                                <option value="3+">+++ (3+)</option>
+                                <option value="4+">++++ (4+)</option>
+                            </select>
+                        </td>
+                        
+                        <td class="asg-ppp-cell">
+                             <div class="symptom-grid" style="min-width: 400px;">
+                                <div class="symptom-item"><label>Têmporas</label><select class="form-select form-select-sm" data-col="EF: Têmporas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Clavículas</label><select class="form-select form-select-sm" data-col="EF: Clavículas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Ombros</label><select class="form-select form-select-sm" data-col="EF: Ombros"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Mãos (Interós.)</label><select class="form-select form-select-sm" data-col="EF: Mãos"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Escápulas</label><select class="form-select form-select-sm" data-col="EF: Escápulas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Coxas</label><select class="form-select form-select-sm" data-col="EF: Coxas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Panturrilhas</label><select class="form-select form-select-sm" data-col="EF: Panturrilhas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Periorbital</label><select class="form-select form-select-sm" data-col="EF: Periorbital"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Tríceps</label><select class="form-select form-select-sm" data-col="EF: Tríceps"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Costelas</label><select class="form-select form-select-sm" data-col="EF: Costelas"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Edema Tornozelo</label><select class="form-select form-select-sm" data-col="EF: Edema Tornozelo"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                                <div class="symptom-item"><label>Edema Sacral</label><select class="form-select form-select-sm" data-col="EF: Edema Sacral"><option value="0">0</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                            </div>
+                        </td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select score" data-col="N.4: Score Ex. Físico" data-calc="all">
+                                <option value="0">0: Sem déficit</option>
+                                <option value="1">1: Leve</option>
+                                <option value="2">2: Moderado</option>
+                                <option value="3">3: Grave</option>
+                            </select>
+                        </td>
+
+                        <td><input type="number" class="form-input form-input-sm" data-col="Fator Calórico (kcal/kg)" data-calc="metas" placeholder="ex: 25"></td>
+                        <td><input type="text" class="form-input calculated" data-col="Meta Calórica (kcal/dia)" data-calc-target="metaCalorica" readonly></td>
+                        <td><input type="number" class="form-input form-input-sm" data-col="Fator Proteico (g/kg)" step="0.1" data-calc="metas" placeholder="ex: 1.2"></td>
+                        <td><input type="text" class="form-input calculated" data-col="Meta Proteica (g/dia)" data-calc-target="metaProteica" readonly></td>
+                        <td>
+                            <select class="form-select" data-col="Fator Hídrico (mL/kg)" data-calc="metas">
+                                <option value="">Selecione...</option>
+                                <option value="30">30</option>
+                                <option value="35">35</option>
+                                <option valueT="40">40</option>
+                                <option value="individualizado">Individualizado</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-input calculated" data-col="Meta Hídrica (L/dia)" data-calc-target="metaHidrica" readonly></td>
+                        <td><input type="text" class="form-input calculated" data-col="Ref. Hídrica 30mL/kg (L)" data-calc-target="refHidrica30" readonly></td>
+                        <td><input type="text" class="form-input calculated" data-col="Ref. Hídrica 35mL/kg (L)" data-calc-target="refHidrica35" readonly></td>
+                        
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated score-total" data-col="ASG-PPP Score Total (N1-N4)" data-calc-target="scoreTotal" readonly></td>
+                        <td class="asg-ppp-cell">
+                            <select class="form-select score-total" data-col="ASG-PPP Avaliação Global (A/B/C)" data-calc="all">
+                                <option value="">Selecione (Manual)...</option>
+                                <option value="A">A: Bem nutrido</option>
+                                <option value="B">B: Desnutrição suspeita/moderada</option>
+                                <option value="C">C: Desnutrição grave</option>
+                            </select>
+                        </td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated score-total" data-col="ASG-PPP Triagem (Recomendação)" data-calc-target="triagem" readonly></td>
+                        <td><textarea class="form-input form-textarea" data-col="Recomendações/Conduta" style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
+                        
+                        <td><textarea class="form-input calculated form-textarea" data-col="PES" data-calc-target="dxNutricional" readonly rows="4" style="white-space: pre-wrap; min-width: 300px;"></textarea></td>
+                        <td><textarea class="form-input form-textarea" data-col="Escreva aqui o seu Diagnóstico Nutricional" placeholder="Dx Nutricional (manual)..." style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
+                        <td><textarea class="form-input form-textarea" data-col="Plano Nutricional" placeholder="Ex: Dieta hipercalórica..." style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
+
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated" data-col="Pontuação Total (Final)" data-calc-target="fechamentoScore" readonly></td>
+                        <td class="asg-ppp-cell"><input type="text" class="form-input calculated" data-col="Avaliação Global (Final)" data-calc-target="fechamentoGlobal" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <datalist id="dx-list">
+        <option value="Insuficiência Cardíaca (IC)">
+        <option value="Doença Renal Crônica (DRC)">
+        <option value="DPOC">
+        <option value="AVC">
+        <option value="Pneumonia">
+    </datalist>
+    <datalist id="comorb-list">
+        <option value="Etilismo">
+        <option value="Tabagismo">
+        <option value="Hipotireoidismo">
+        <option value="Ansiedade">
+        <option value="Depressão">
+    </datalist>
+
+
+    <div id="dashboardModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Estatísticas em Tempo Real</h2>
+                <button id="closeDashboard" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total de Pacientes</div>
+                    <div id="stat-total" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Média de Idade</div>
+                    <div id="stat-avg-age" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Risco Nutricional (NRS ≥ 3)</div>
+                    <div id="stat-nrs-risk" class="stat-value">0 (0%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Desnutrição (ASG-PPP B/C)</div>
+                    <div id="stat-pgsga-risk" class="stat-value">0 (0%)</div>
+                </div>
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-title">Pacientes por Setor</div>
+                    <ul id="stat-setor" class="stat-list"></ul>
+                </div>
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-title">Contagem de Comorbidades</div>
+                    <ul id="stat-comorb" class="stat-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('tableBody');
+            const rowTemplate = document.getElementById('rowTemplate');
+            
+            if (!rowTemplate) {
+                console.error("ERRO CRÍTICO: A linha modelo #rowTemplate não foi encontrada. Verifique o HTML.");
+                return;
+            }
+            if (!tableBody) {
+                console.error("ERRO CRÍTICO: O corpo da tabela #tableBody não foi encontrado. Verifique o HTML.");
+                return;
+            }
+
+            // --- Função principal para atualizar cálculos ---
+            function updateCalculations(row) {
+                const getEl = (colName) => row.querySelector(`[data-col="${colName}"]`);
+                const getCalcTarget = (targetName) => row.querySelector(`[data-calc-target="${targetName}"]`);
+                let idade = 0, imc = 0, pesoAtual = 0;
+                try {
+                    const dataNascInput = getEl('Data de Nasc.');
+                    const idadeTarget = getCalcTarget('idade');
+                    if (dataNascInput.value) {
+                        const birthDate = new Date(dataNascInput.value);
+                        const birthDateUTC = new Date(birthDate.getUTCFullYear(), birthDate.getUTCMonth(), birthDate.getUTCDate());
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDateUTC.getFullYear();
+                        const m = today.getMonth() - birthDateUTC.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birthDateUTC.getDate())) { age--; }
+                        if (age < 0) age = 0;
+                        idadeTarget.value = age;
+                        idade = age; 
+                    } else { idadeTarget.value = ''; }
+                } catch (e) { console.error("Erro Idade:", e); }
+                try {
+                    const aj = parseFloat(getEl('AJ (cm)').value);
+                    const genero = getEl('Gênero').value;
+                    const alturaEstimadaTarget = getCalcTarget('alturaEstimada');
+                    const alturaManual = parseFloat(getEl('Altura (m)').value);
+                    if (isNaN(alturaManual) && !isNaN(aj) && aj > 0 && !isNaN(idade) && genero) {
+                        let alturaCm = 0;
+                        if (genero === 'Masculino') { alturaCm = (2.02 * aj) - (0.04 * idade) + 64.19; } 
+                        else if (genero === 'Feminino') { alturaCm = (1.83 * aj) - (0.24 * idade) + 84.88; }
+                        alturaEstimadaTarget.value = (alturaCm / 100).toFixed(2);
+                    } else { alturaEstimadaTarget.value = ''; }
+                } catch (e) { console.error("Erro Altura Estimada:", e); }
+                
+                pesoAtual = parseFloat(getEl('Peso Atual (kg)').value);
+                
+                let scoreN1 = 0;
+
+                if (!isNaN(pesoAtual) && pesoAtual > 0) {
+                    try {
+                        const pesoHab = parseFloat(getEl('Peso Habitual (kg)').value);
+                        const peso1M = parseFloat(getEl('Peso 1 Mês (kg)').value);
+                        const peso6M = parseFloat(getEl('Peso 6 Meses (kg)').value);
+                        const perda1mTarget = getCalcTarget('perda1m');
+                        const perda6mTarget = getCalcTarget('perda6m');
+                        
+                        const scoreN1_target = getCalcTarget('scoreN1');
+                        
+                        let perda1mValue = NaN;
+                        let perda6mValue = NaN;
+
+                        if (!isNaN(peso1M) && peso1M > 0) { 
+                            perda1mValue = (((peso1M - pesoAtual) / peso1M) * 100);
+                            perda1mTarget.value = perda1mValue.toFixed(1) + '%'; 
+                        } 
+                        else { 
+                            perda1mTarget.value = ''; 
+                        }
+
+                        if (!isNaN(peso6M) && peso6M > 0) { 
+                            perda6mValue = (((peso6M - pesoAtual) / peso6M) * 100);
+                            perda6mTarget.value = perda6mValue.toFixed(1) + '%'; 
+                        } 
+                        else { 
+                            perda6mTarget.value = ''; 
+                        }
+                        
+                        scoreN1 = 0;
+                        let base1M_score = !isNaN(peso1M) && peso1M > 0 ? peso1M : pesoHab;
+                        let base6M_score = !isNaN(peso6M) && peso6M > 0 ? peso6M : pesoHab;
+                        
+                        let usou1M = false;
+
+                        if (!isNaN(base1M_score) && base1M_score > 0) {
+                            const perda1mScoreValue = (((base1M_score - pesoAtual) / base1M_score) * 100);
+                            if (perda1mScoreValue >= 10) scoreN1 = 4;
+                            else if (perda1mScoreValue >= 5) scoreN1 = 3;
+                            else if (perda1mScoreValue >= 3) scoreN1 = 2;
+                            else if (perda1mScoreValue >= 2) scoreN1 = 1;
+                            usou1M = true;
+                        } 
+                        
+                        if (!usou1M && !isNaN(base6M_score) && base6M_score > 0) {
+                            const perda6mScoreValue = (((base6M_score - pesoAtual) / base6M_score) * 100);
+                            if (perda6mScoreValue >= 20) scoreN1 = 4;
+                            else if (perda6mScoreValue >= 10) scoreN1 = 3;
+                            else if (perda6mScoreValue >= 6) scoreN1 = 2;
+                            else if (perda6mScoreValue >= 2) scoreN1 = 1;
+                        }
+                        
+                        if (isNaN(base1M_score) && isNaN(base6M_score)) {
+                             scoreN1_target.value = '';
+                        } else {
+                             scoreN1_target.value = scoreN1;
+                        }
+
+                    } catch (e) { 
+                        console.error("Erro Perda Peso:", e); 
+                        const scoreN1_target = getCalcTarget('scoreN1');
+                        if (scoreN1_target) scoreN1_target.value = '';
+                    }
+
+                    try {
+                        const altura = parseFloat(getEl('Altura (m)').value);
+                        const alturaEstimada = parseFloat(getCalcTarget('alturaEstimada').value);
+                        const imcTarget = getCalcTarget('imc');
+                        let alturaUsada = altura;
+                        if (isNaN(altura) || altura <= 0) alturaUsada = alturaEstimada;
+                        if (!isNaN(alturaUsada) && alturaUsada > 0) {
+                            imc = pesoAtual / (alturaUsada * alturaUsada);
+                            imcTarget.value = imc.toFixed(2);
+                            const classTarget = getCalcTarget('classIMC');
+                            let classificacao = '';
+                            if (!isNaN(imc) && idade > 0) {
+                                if (idade >= 60) {
+                                    if (imc < 22.0) classificacao = 'Baixo peso';
+                                    else if (imc <= 27.0) classificacao = 'Eutrofia';
+                                    else classificacao = 'Excesso de peso';
+                                } else {
+                                    if (imc < 18.5) classificacao = 'Baixo peso';
+                                    else if (imc <= 24.9) classificacao = 'Eutrofia';
+                                    else if (imc <= 29.9) classificacao = 'Sobrepeso';
+                                    else if (imc <= 34.9) classificacao = 'Obesidade I';
+                                    else if (imc <= 39.9) classificacao = 'Obesidade II';
+                                    else classificacao = 'Obesidade III';
+                                }
+                            }
+                            classTarget.value = classificacao;
+                        } else {
+                            imcTarget.value = '';
+                            getCalcTarget('classIMC').value = '';
+                        }
+                    } catch (e) { console.error("Erro IMC:", e); }
+                    try {
+                        const fatorCalorico = parseFloat(getEl('Fator Calórico (kcal/kg)').value);
+                        const fatorProteico = parseFloat(getEl('Fator Proteico (g/kg)').value);
+                        const fatorHidrico = parseFloat(getEl('Fator Hídrico (mL/kg)').value);
+                        getCalcTarget('metaCalorica').value = (!isNaN(fatorCalorico)) ? (pesoAtual * fatorCalorico).toFixed(0) : '';
+                        getCalcTarget('metaProteica').value = (!isNaN(fatorProteico)) ? (pesoAtual * fatorProteico).toFixed(1) : '';
+                        getCalcTarget('metaHidrica').value = (!isNaN(fatorHidrico)) ? ((pesoAtual * fatorHidrico) / 1000).toFixed(2) : '';
+                        getCalcTarget('refHidrica30').value = ((pesoAtual * 30) / 1000).toFixed(2);
+                        getCalcTarget('refHidrica35').value = ((pesoAtual * 35) / 1000).toFixed(2);
+                    } catch (e) { console.error("Erro Metas:", e); }
+                } else {
+                    ['perda1m', 'perda6m', 'imc', 'classIMC', 'metaCalorica', 'metaProteica', 'metaHidrica', 'refHidrica30', 'refHidrica35']
+                        .forEach(target => {
+                            const el = getCalcTarget(target);
+                            if(el) el.value = '';
+                        });
+                    const scoreN1_target = getCalcTarget('scoreN1');
+                    if (scoreN1_target) scoreN1_target.value = '';
+                }
+                const imcVal = parseFloat(getCalcTarget('imc').value);
+                const genero = getEl('Gênero').value;
+
+                try {
+                    const cbOriginal = parseFloat(getEl('CB (cm)').value);
+                    const cbAjustadaTarget = getCalcTarget('cbAjustada');
+                    let ajuste = 0;
+                    if (!isNaN(cbOriginal) && !isNaN(imcVal) && genero) {
+                        if (imcVal >= 25 && imcVal < 30) {
+                            ajuste = (genero === 'Feminino') ? -2 : -3;
+                        } else if (imcVal >= 30 && imcVal < 40) {
+                            ajuste = (genero === 'Feminino') ? -6 : -7;
+                        } else if (imcVal >= 40) {
+                            ajuste = (genero === 'Feminino') ? -9 : -10;
+                        }
+                        cbAjustadaTarget.value = (cbOriginal + ajuste).toFixed(1);
+                    } else {
+                        cbAjustadaTarget.value = '';
+                    }
+                } catch (e) { console.error("Erro CB Ajustada:", e); }
+                
+                try {
+                    const cpOriginal = parseFloat(getEl('CP (cm)').value);
+                    const cpAjustadaTarget = getCalcTarget('cpAjustada');
+                    let ajuste = 0;
+                    if (!isNaN(cpOriginal) && !isNaN(imcVal) && genero) {
+                         if (imcVal >= 25 && imcVal < 30) {
+                            ajuste = (genero === 'Feminino') ? -2 : -3;
+                        } else if (imcVal >= 30 && imcVal < 40) {
+                            ajuste = (genero === 'Feminino') ? -6 : -7;
+                        } else if (imcVal >= 40) {
+                            ajuste = (genero === 'Feminino') ? -9 : -10;
+                        }
+                        cpAjustadaTarget.value = (cpOriginal + ajuste).toFixed(1);
+                    } else {
+                        cpAjustadaTarget.value = '';
+                    }
+                } catch (e) { console.error("Erro CP Ajustada:", e); }
+                
+                // --- CÁLCULO NRS-2002 ---
+                try {
+                    const nrsEstado = parseInt(getEl('NRS: Estado Nutricional').value, 10);
+                    const nrsGravidade = parseInt(getEl('NRS: Gravidade Doença').value, 10);
+                    const nrsIdadeTarget = getCalcTarget('nrsIdade');
+                    if(idade >= 70) { nrsIdadeTarget.value = 1; } 
+                    else if (idade >= 0) { nrsIdadeTarget.value = 0; }
+                    else { nrsIdadeTarget.value = ''; }
+                    const nrsIdade = parseInt(nrsIdadeTarget.value, 10); 
+                    const nrsTotalTarget = getCalcTarget('nrsTotal');
+                    const nrsRiscoTarget = getCalcTarget('nrsRisco');
+                    if (!isNaN(nrsEstado) && !isNaN(nrsGravidade) && !isNaN(nrsIdade)) {
+                        const total = nrsEstado + nrsGravidade + nrsIdade;
+                        nrsTotalTarget.value = total;
+                        if (total >= 3) {
+                            nrsRiscoTarget.value = 'Sim (Iniciar TN)';
+                            nrsRiscoTarget.style.color = '#dc2626'; nrsRiscoTarget.style.fontWeight = 'bold';
+                        } else {
+                            nrsRiscoTarget.value = 'Não (Rastrear)';
+                            nrsRiscoTarget.style.color = '#059669'; nrsRiscoTarget.style.fontWeight = 'normal';
+                        }
+                    } else { nrsTotalTarget.value = ''; nrsRiscoTarget.value = ''; }
+                } catch (e) { console.error("Erro NRS:", e); }
+                
+                // --- CÁLCULOS ASG-PPP ---
+                let scoreP_total = 0;
+                let scoreN2 = 0, scoreN3 = 0, scoreN4 = 0, scoreTotal_N = 0;
+                
+                try {
+                    const scoreP1a = parseInt(getEl('ASG-PPP: P.1 a) Peso (2 sem.)').value, 10) || 0;
+                    const scoreP2a = parseInt(getEl('ASG-PPP: P.2 a) Ingestão (Habitual)').value, 10) || 0;
+                    const scoreP2b = parseInt(getEl('ASG-PPP: P.2 b) Ingestão (Atual)').value, 10) || 0;
+                    const scoreP4 = parseInt(getEl('ASG-PPP: P.4: Atividades e função').value, 10) || 0;
+                    scoreP_total = scoreP1a + scoreP2a + scoreP2b + scoreP4;
+                    getCalcTarget('scoreP1_P4').value = scoreP_total;
+                } catch(e) { console.error("Erro Score P1-P4:", e); }
+
+                try {
+                    scoreN2 = 0; // Reseta o score N2
+                    const idade65Target = getCalcTarget('idade65');
+                    if (idade >= 65) { 
+                        scoreN2 += 1; 
+                        idade65Target.value = "Idade >65 anos (+1 pt)"; 
+                    } 
+                    else if (idade >= 0) { idade65Target.value = "Idade <65 anos (0 pt)"; }
+                    else { idade65Target.value = ''; }
+                    
+                    if (row.querySelector('[data-col="Doença: Câncer"]').checked) scoreN2 += 1;
+                    if (row.querySelector('[data-col="Doença: AIDS"]').checked) scoreN2 += 1;
+                    if (row.querySelector('[data-col="Doença: Caquexia (Card/Pulm)"]').checked) scoreN2 += 1;
+                    if (row.querySelector('[data-col="Doença: Úlcera/Ferida"]').checked) scoreN2 += 1;
+                    if (row.querySelector('[data-col="Doença: Trauma"]').checked) scoreN2 += 1;
+                    if (row.querySelector('[data-col="Doença: IRC"]').checked) scoreN2 += 1;
+                    getCalcTarget('scoreN2').value = scoreN2;
+                } catch (e) { console.error("Erro Score N2:", e); }
+                
+                try {
+                    const febreScore = parseInt(getEl('N.3: Febre').value, 10) || 0;
+                    const duracaoFebreScore = parseInt(getEl('N.3: Duração Febre').value, 10) || 0;
+                    const corticoideScore = parseInt(getEl('N.3: Corticosteroides').value, 10) || 0;
+                    scoreN3 = febreScore + duracaoFebreScore + corticoideScore;
+                    getCalcTarget('scoreN3').value = scoreN3;
+                } catch(e) { console.error("Erro Score N3:", e); }
+
+                try {
+                    scoreN4 = parseInt(getEl('N.4: Score Ex. Físico').value, 10) || 0;
+                    
+                    scoreTotal_N = scoreN1 + scoreN2 + scoreN3 + scoreN4; 
+                    getCalcTarget('scoreTotal').value = scoreTotal_N;
+                    
+                    const triagemTarget = getCalcTarget('triagem');
+                    if (scoreTotal_N <= 1) triagemTarget.value = '0–1: educação/monitorar';
+                    else if (scoreTotal_N <= 3) triagemTarget.value = '2–3: aconselhamento/controle de sintomas';
+                    else if (scoreTotal_N <= 8) triagemTarget.value = '4–8: intervenção com nutricionista';
+                    else triagemTarget.value = '≥9: necessidade crítica de controle de sintomas';
+                } catch (e) { console.error("Erro Score Total N:", e); }
+                
+                let globalVal_ASG = '';
+                try {
+                    getCalcTarget('fechamentoScore').value = scoreTotal_N; 
+                    globalVal_ASG = getEl('ASG-PPP Avaliação Global (A/B/C)').value;
+                    let globalText = '';
+                    if (globalVal_ASG === 'A') globalText = 'A: Bem nutrido';
+                    else if (globalVal_ASG === 'B') globalText = 'B: Desnutrição suspeita/moderada';
+                    else if (globalVal_ASG === 'C') globalText = 'C: Desnutrição grave';
+                    getCalcTarget('fechamentoGlobal').value = globalText;
+                } catch (e) { console.error("Erro Fechamento:", e); }
+
+                // --- NOVO v5.5: Cálculo do Diagnóstico Nutricional ---
+                try {
+                    const dxTarget = getCalcTarget('dxNutricional');
+                    const nrsRisco = getEl('NRS: Risco Nutricional (≥3)').value;
+                    const classIMC = getCalcTarget('classIMC').value;
+                    
+                    const altDeglut = getEl('Altera. Mastig/Deglut.').value;
+                    const ingestaoAtualEl = getEl('ASG-PPP: P.2 b) Ingestão (Atual)');
+                    
+                    let dxStrings = [];
+                    
+                    // [P] Problema
+                    if (globalVal_ASG === 'C') dxStrings.push('[P] ASG-PPP: Desnutrição grave');
+                    else if (globalVal_ASG === 'B') dxStrings.push('[P] ASG-PPP: Desnutrição moderada');
+                    
+                    if (nrsRisco.startsWith('Sim')) dxStrings.push('[P] NRS: Risco Nutricional');
+                    
+                    if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
+
+                    if (dxStrings.length === 0 && (nrsRisco || globalVal_ASG)) dxStrings.push('[P] Estado nutricional adequado');
+
+                    // [E] Etiologia (Sugestões)
+                    if (altDeglut && altDeglut !== 'Nenhuma') dxStrings.push(`[E] Etiologia Sugerida: ${altDeglut}`);
+                    if (ingestaoAtualEl && ingestaoAtualEl.value && parseInt(ingestaoAtualEl.value, 10) > 0) dxStrings.push(`[E] Etiologia Sugerida: Baixa ingestão alimentar`);
+                    if (scoreN3 > 0) dxStrings.push(`[E] Etiologia Sugerida: Aumento da demanda metabólica`);
+
+                    // [S] Sinais/Sintomas
+                    const perda1m = getCalcTarget('perda1m').value;
+                    const perda6m = getCalcTarget('perda6m').value;
+                    const aceitacao = getEl('Aceitação Dieta Hosp. (%)').value;
+                    
+                    if(perda1m) dxStrings.push(`[S] Evidência: Perda de ${perda1m} em 1 mês`);
+                    else if(perda6m) dxStrings.push(`[S] Evidência: Perda de ${perda6m} em 6 meses`);
+                    
+                    if(aceitacao && parseInt(aceitacao, 10) < 75) dxStrings.push(`[S] Evidência: Baixa aceitação da dieta (${aceitacao}%)`);
+                    
+                    if(scoreTotal_N > 0) dxStrings.push(`[S] Evidência: ASG-PPP Score N1-N4 = ${scoreTotal_N}`);
+
+                    dxTarget.value = dxStrings.join('\n');
+                } catch(e) { console.error("Erro ao gerar DX:", e); }
+
+
+                saveToLocalStorage();
+            }
+            
+            // --- Função para Mostrar/Ocultar colunas por Setor ---
+            function toggleSectorCells(row, setor) {
+                const isAmbOnco = (setor === 'Amb. Onco');
+                const isObsOnco = (setor === 'Obs. Onco');
+                const isAsgApplicable = isAmbOnco || isObsOnco; // *** CORREÇÃO v5.8 ***
+                
+                const isNonOnco = !isAsgApplicable && setor !== '';
+                const isDescricaoSector = (setor === 'Observação' || setor === 'P. Barreto' || setor === 'Neuro P. Barreto');
+                const showNRS = !isAsgApplicable; 
+                
+                row.querySelectorAll('.asg-ppp-cell').forEach(cell => {
+                    cell.style.display = isAsgApplicable ? 'table-cell' : 'none';
+                });
+                row.querySelectorAll('.non-onco-cell').forEach(cell => { // 'Descrição (Mastig/Deglut.)'
+                    cell.style.display = isDescricaoSector ? 'table-cell' : 'none';
+                });
+                row.querySelectorAll('.nrs-cell').forEach(cell => {
+                    cell.style.display = showNRS ? 'table-cell' : 'none';
+                });
+                
+                // --- Lógica de visibilidade do Diagnóstico Médico ---
+                const dxOncoCell = row.querySelector('.dx-onco-cell');
+                const dxMotivoCell = row.querySelector('.dx-motivo-cell'); 
+                if (isAsgApplicable) {
+                    if(dxOncoCell) dxOncoCell.style.display = 'table-cell';
+                    if(dxMotivoCell) dxMotivoCell.style.display = 'none';
+                } else if (isNonOnco) { 
+                    if(dxOncoCell) dxOncoCell.style.display = 'none';
+                    if(dxMotivoCell) dxMotivoCell.style.display = 'table-cell';
+                } else { // Setor está em branco
+                    if(dxOncoCell) dxOncoCell.style.display = 'none';
+                    if(dxMotivoCell) dxMotivoCell.style.display = 'table-cell'; // Mostra por padrão se nada for selecionado
+                }
+            }
+            
+            function updateAllHeaderVisibility(setor) {
+                 const isAmbOnco = (setor === 'Amb. Onco');
+                const isObsOnco = (setor === 'Obs. Onco');
+                const isAsgApplicable = isAmbOnco || isObsOnco; // *** CORREÇÃO v5.8 ***
+                const showNRS = !isAsgApplicable;
+                const isNonOnco = !isAsgApplicable && setor !== '';
+                const isDescricaoSector = (setor === 'Observação' || setor === 'P. Barreto' || setor === 'Neuro P. Barreto');
+                
+                document.querySelectorAll('thead th.asg-ppp-cell').forEach(th => {
+                    th.style.display = isAsgApplicable ? 'table-cell' : 'none';
+                });
+                document.querySelectorAll('thead th.non-onco-cell').forEach(th => {
+                    th.style.display = isDescricaoSector ? 'table-cell' : 'none';
+                });
+                document.querySelectorAll('thead th.nrs-cell').forEach(th => {
+                    th.style.display = showNRS ? 'table-cell' : 'none';
+                });
+                
+                // --- Lógica de visibilidade do Cabeçalho de Diagnóstico Médico ---
+                const dxOncoHeader = document.querySelector('thead th.dx-onco-cell');
+                const dxMotivoHeader = document.querySelector('thead th.dx-motivo-cell'); 
+                if (isAsgApplicable) {
+                    if(dxOncoHeader) dxOncoHeader.style.display = 'table-cell';
+                    if(dxMotivoHeader) dxMotivoHeader.style.display = 'none';
+                } else if (isNonOnco) {
+                    if(dxOncoHeader) dxOncoHeader.style.display = 'none';
+                    if(dxMotivoHeader) dxMotivoHeader.style.display = 'table-cell';
+                } else {
+                    if(dxOncoHeader) dxOncoHeader.style.display = 'none';
+                    if(dxMotivoHeader) dxMotivoHeader.style.display = 'table-cell'; // Mostra por padrão se nada for selecionado
+                }
+            }
+
+            // --- Função para habilitar/desabilitar campo de meds ---
+            function toggleMedsField(row) {
+                const fazUsoSelect = row.querySelector('[data-col="Faz uso de Meds?"]');
+                const medsInput = row.querySelector('[data-col="Medicamentos em Uso"]');
+                if (!fazUsoSelect || !medsInput) return;
+                
+                if (fazUsoSelect.value === 'Não') {
+                    medsInput.disabled = true;
+                    if(document.activeElement !== fazUsoSelect) {
+                        medsInput.value = '';
+                    }
+                } else {
+                    medsInput.disabled = false;
+                }
+            }
+
+            // --- Adicionar Event Listeners ---
+            function addEventListeners(row) {
+                row.querySelectorAll('[data-calc]').forEach(input => {
+                    const eventType = (input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.type === 'checkbox')) ? 'change' : 'input';
+                    input.addEventListener(eventType, () => updateCalculations(row));
+                });
+                
+                row.querySelector('[data-col="Setor"]').addEventListener('change', (e) => {
+                    const selectedValue = e.target.value;
+                    document.querySelectorAll('.patient-row:not(#rowTemplate)').forEach(r => {
+                         toggleSectorCells(r, selectedValue);
+                    });
+                    updateAllHeaderVisibility(selectedValue);
+                    updateCalculations(row); // Recalcula tudo para atualizar o Dx
+                    saveToLocalStorage();
+                });
+
+                row.querySelector('[data-col="Faz uso de Meds?"]').addEventListener('change', () => {
+                    toggleMedsField(row);
+                    saveToLocalStorage();
+                });
+
+                row.querySelectorAll('input, select, textarea').forEach(input => {
+                     const eventType = (input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.type === 'checkbox') || (input.tagName === 'TEXTAREA')) ? 'input' : 'input';
+                     if (!input.dataset.calc && input.dataset.col !== 'Faz uso de Meds?') {
+                        input.addEventListener(eventType, () => saveToLocalStorage());
+                     }
+                });
+                
+                // --- NOVO v5.9: Listener para o botão de impressão da linha ---
+                row.querySelector('.print-row-btn').addEventListener('click', () => {
+                    generateReportForRow(row);
+                });
+
+                updateCalculations(row); 
+            }
+
+
+            // --- Funções de Local Storage (Salvar Rascunho) ---
+            const STORAGE_KEY = 'nutriFormData_v5.9_local'; // Chave atualizada
+
+            function saveToLocalStorage() {
+                const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
+                const data = [];
+                rows.forEach(row => {
+                    const rowData = {};
+                    row.querySelectorAll('input:not([type="button"]), select, textarea').forEach(el => {
+                        const colName = el.getAttribute('data-col');
+                        if (colName) {
+                            if (el.type === 'checkbox') {
+                                rowData[colName] = el.checked;
+                            } else {
+                                rowData[colName] = el.value;
+                            }
+                        }
+                    });
+                    data.push(rowData);
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            }
+
+            function loadFromLocalStorage() {
+                const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (data.length === 0) {
+                    createNewRow();
+                    return;
+                }
+                data.forEach(rowData => {
+                    createNewRow(rowData);
+                });
+            }
+
+            // --- Função central para criar linha ---
+            function createNewRow(data = null) {
+                const newRow = rowTemplate.cloneNode(true);
+                newRow.id = ''; // Remove o ID do template
+                newRow.style.display = 'table-row'; // Torna a linha visível
+
+                if (data) {
+                    newRow.querySelectorAll('input:not([type="button"]), select, textarea').forEach(el => {
+                        const colName = el.getAttribute('data-col');
+                        if (colName && data[colName] !== undefined) {
+                            if (el.type === 'checkbox') {
+                                el.checked = data[colName];
+                            } else {
+                                el.value = data[colName];
+                            }
+                        }
+                    });
+                }
+
+                tableBody.appendChild(newRow);
+                addEventListeners(newRow);
+
+                const setor = data ? data['Setor'] : '';
+                toggleSectorCells(newRow, setor);
+                
+                toggleMedsField(newRow);
+                updateCalculations(newRow);
+                return newRow;
+            }
+
+            // --- Funcionalidade: Adicionar Nova Linha (Botão) ---
+            document.getElementById('addRow').addEventListener('click', () => {
+                const newRow = createNewRow();
+                newRow.querySelector('input, select').focus();
+                saveToLocalStorage();
+            });
+
+            // --- Funcionalidade: Exportar CSV ---
+            document.getElementById('exportCSV').addEventListener('click', () => {
+                let csvContent = "data:text/csv;charset=utf-8-sig,";
+                const headers = Array.from(document.querySelectorAll('thead th'))
+                                    .map(th => `"${th.textContent.replace(/"/g, '""')}"`)
+                                    .join(',');
+                csvContent += headers + '\r\n';
+                const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
+                rows.forEach(row => {
+                    const rowData = [];
+                    document.querySelectorAll('thead th').forEach((th, index) => {
+                        const colName = th.textContent;
+                        let cellValue = '""'; 
+                        const cell = row.querySelectorAll('td')[index];
+                        if (!cell) return;
+                        
+                        let cellElement = cell.querySelector('input:not([type="button"]):not([type="checkbox"]), select, textarea');
+                        if (!cellElement) {
+                             cellElement = cell.querySelector('[data-calc-target]');
+                        }
+                        
+                        if (cellElement) {
+                            // Limpa quebras de linha para o CSV
+                            cellValue = `"${cellElement.value.replace(/"/g, '""').replace(/\n/g, ' | ')}"`;
+                        } else if (colName === "P.3: SINTOMAS") {
+                            const symptoms = [];
+                            cell.querySelectorAll('[data-col^="Sintoma:"]').forEach(sel => {
+                                if(sel.value !== '0') { symptoms.push(`${sel.dataset.col.split(':')[1].trim()}: ${sel.value}`); }
+                            });
+                            const outros = cell.querySelector('[data-col="ASG-PPP: Outros Sintomas"]').value;
+                            if (outros) symptoms.push(`Outros: ${outros}`);
+                            cellValue = `"${symptoms.join('; ')}"`;
+                        } else if (colName === "N.2: Doenças (Score)") {
+                            const diseases = [];
+                            cell.querySelectorAll('[data-col^="Doença:"]:checked').forEach(chk => {
+                                const label = row.querySelector(`label[for="${chk.id}"]`);
+                                if (label) diseases.push(label.textContent);
+                            });
+                            cellValue = `"${diseases.join('; ')}"`;
+                        } else if (colName === "N.4 Ex. Físico (ASG-PPP): Campos (0-3+)") {
+                            const ef = [];
+                            cell.querySelectorAll('[data-col^="EF:"]').forEach(sel => {
+                                if(sel.value !== '0') { ef.push(`${sel.dataset.col.split(':')[1].trim()}: ${sel.value}`); }
+                            });
+                            cellValue = `"${ef.join('; ')}"`;
+                        }
+                        rowData.push(cellValue);
+                    });
+                    csvContent += rowData.join(',') + '\r\n';
+                });
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', 'avaliacao_unificada_pacientes.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // --- NOVO v5.9: Gerar Relatório A4 (para uma linha específica) ---
+            function generateReportForRow(row) {
+                if (!row) {
+                    alert('Erro: Linha do paciente não encontrada.');
+                    return;
+                }
+                const reportHTML = createReportHTML(row);
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(reportHTML);
+                reportWindow.document.close();
+                setTimeout(() => { reportWindow.print(); }, 500);
+            }
+            
+            function createReportHTML(row) {
+                const getVal = (col) => { const el = row.querySelector(`[data-col="${col}"]`); return el ? el.value : 'N/A'; };
+                const getCalc = (target) => { const el = row.querySelector(`[data-calc-target="${target}"]`); return el ? el.value : 'N/A'; };
+                
+                const setor = getVal('Setor');
+                const isAsgApplicable = (setor === 'Amb. Onco' || setor === 'Obs. Onco');
+                const showNRS = !isAsgApplicable;
+
+                const nome = getVal('Nome/Iniciais') || 'Não informado';
+                const dataAval = getVal('Data da Avaliação') || 'N/A';
+                const estagiario = getVal('Estagiário') || 'N/A';
+                
+                const dxMedicoOnco = getVal('Diagnóstico Médico (Onco)');
+                const dxMedicoMotivo = getVal('Motivo da Internação');
+                const dxMedico = (isAsgApplicable) ? dxMedicoOnco : dxMedicoMotivo;
+
+                const idade = getCalc('idade') || 'N/A';
+                const genero = getVal('Gênero') || 'N/A';
+                const peso = getVal('Peso Atual (kg)') || 'N/A';
+                const alturaManual = getVal('Altura (m)');
+                const alturaEstimada = getCalc('alturaEstimada');
+                const alturaUsada = alturaManual || alturaEstimada || 'N/A';
+                const imc = getCalc('imc') || 'N/A';
+                const classIMC = getCalc('classIMC') || 'N/A';
+
+                const nrsScore = getCalc('nrsTotal') || 'N/A';
+                const nrsRisco = getCalc('nrsRisco') || 'N/A';
+                let nrsHtml = '';
+                if(showNRS) {
+                    nrsHtml = `<div class="info-item"><span class="info-label">NRS-2002 Score Total</span><span class="info-value">${nrsScore}</span></div><div class="info-item"><span class="info-label">Risco Nutricional (≥3)</span><span class="info-value">${nrsRisco}</span></div>`;
+                    if (nrsRisco.startsWith('Sim')) {
+                        nrsHtml = `<div class="highlight-risk-nrs"><h3>RISCO NUTRICIONAL (NRS-2002)</h3>${nrsHtml}</div>`;
+                    }
+                }
+
+                let pgsgaHtml = '';
+                if (isAsgApplicable) {
+                    const pgsgaScore = getCalc('scoreTotal') || 'N/A';
+                    const pgsgaGlobal = getVal('ASG-PPP Avaliação Global (A/B/C)');
+                    const pgsgaGlobalText = pgsgaGlobal === 'A' ? 'A: Bem nutrido' : pgsgaGlobal === 'B' ? 'B: Desnutrição suspeita/moderada' : pgsgaGlobal === 'C' ? 'C: Desnutrição grave' : 'N/A';
+                    const pgsgaTriagem = getCalc('triagem') || 'N/A';
+                    
+                    pgsgaHtml = `<div class="info-item"><span class="info-label">ASG-PPP Score Numérico (N1-N4)</span><span class="info-value">${pgsgaScore}</span></div>
+                                 <div class="info-item"><span class="info-label">ASG-PPP Score (P1-P4)</span><span class="info-value">${getCalc('scoreP1_P4')}</span></div>
+                                 <div class="info-item"><span class="info-label">ASG-PPP Avaliação Global</span><span class="info-value">${pgsgaGlobalText}</span></div>
+                                 <div class="info-item"><span class="info-label">Recomendação de Triagem</span><span class="info-value-sm">${pgsgaTriagem}</span></div>`;
+                    if (pgsgaGlobal === 'B' || pgsgaGlobal === 'C') {
+                        pgsgaHtml = `<div class="highlight-risk-pgsga"><h3>AVALIAÇÃO ASG-PPP</h3>${pgsgaHtml}</div>`;
+                    }
+                }
+
+                const metaKcal = getCalc('metaCalorica') || 'N/A';
+                const metaPtn = getCalc('metaProteica') || 'N/A';
+                const metaHidrica = getCalc('metaHidrica') || 'N/A';
+                const recomendacoes = getVal('Recomendações/Conduta').replace(/\n/g, '<br>') || 'Nenhuma observação.';
+                const obsGerais = getVal('Informações Extras').replace(/\n/g, '<br>') || 'Nenhuma.';
+                
+                const dxNutricionalPES = getCalc('dxNutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
+                const dxNutricionalManual = getVal('Escreva aqui o seu Diagnóstico Nutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
+                const planoNutricional = getVal('Plano Nutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
+
+                const styles = Array.from(document.querySelectorAll('style:not([src])')).map(style => style.innerHTML).join('');
+
+                return `<html><head><title>Relatório Nutricional - ${nome}</title><style>${styles}</style></head>
+                        <body><div class="print-container">
+                            <div class="print-header"><h1>Relatório de Avaliação Nutricional</h1><p>Paciente: ${nome}</p></div>
+                            <div class="print-section"><h2>Identificação do Paciente</h2>
+                                <div class="grid-3-col">
+                                    <div class="info-item"><span class="info-label">Nome / Iniciais</span><span class="info-value">${nome}</span></div>
+                                    <div class="info-item"><span class="info-label">Idade</span><span class="info-value">${idade} anos</span></div>
+                                    <div class="info-item"><span class="info-label">Gênero</span><span class="info-value">${genero}</span></div>
+                                    <div class="info-item"><span class="info-label">Data da Avaliação</span><span class="info-value-sm">${dataAval}</span></div>
+                                    <div class="info-item"><span class="info-label">Avaliador</span><span class="info-value-sm">${estagiario}</span></div>
+                                    <div class="info-item"><span class="info-label">Setor</span><span class="info-value-sm">${getVal('Setor')}</span></div>
+                                </div>
+                                <div class="info-item"><span class="info-label">${isAsgApplicable ? 'Diagnóstico Médico' : 'Motivo da Internação'}</span><span class="info-value">${dxMedico}</span></div>
+                            </div>
+                            <div class="print-section"><h2>Antropometria</h2>
+                                <div class="grid-3-col">
+                                    <div class="info-item"><span class="info-label">Peso Atual</span><span class="info-value">${peso} kg</span></div>
+                                    <div class="info-item"><span class="info-label">Altura (Usada no cálculo)</span><span class="info-value">${alturaUsada} m</span></div>
+                                    <div class="info-item"><span class="info-label">Peso Habitual</span><span class="info-value">${getVal('Peso Habitual (kg)')} kg</span></div>
+                                    <div class="info-item"><span class="info-label">IMC</span><span class="info-value">${imc} kg/m²</span></div>
+                                    <div class="info-item" style="grid-column: span 2;"><span class="info-label">Classificação IMC</span><span class="info-value">${classIMC}</span></div>
+                                </div>
+                            </div>
+                            <div class="print-section"><h2>Triagem e Avaliação de Risco</h2>${nrsHtml}<br>${pgsgaHtml}</div>
+                            <div class="print-section"><h2>Metas Nutricionais</h2>
+                                <div class="grid-3-col">
+                                    <div class="info-item"><span class="info-label">Meta Calórica</span><span class="info-value">${metaKcal} kcal/dia</span></div>
+                                    <div class="info-item"><span class="info-label">Meta Proteica</span><span class="info-value">${metaPtn} g/dia</span></div>
+                                    <div class="info-item"><span class="info-label">Meta Hídrica</span><span class="info-value">${metaHidrica} L/dia</span></div>
+                                </div>
+                            </div>
+                            <div class="print-section"><h2>Observações, Diagnóstico e Plano</h2>
+                                <div class="info-item"><span class="info-label">Informações Extras (Paciente)</span><span class="info-value-sm">${obsGerais}</span></div>
+                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; page-break-inside: avoid;"><strong>Diagnóstico Nutricional (PES - Automático):</strong><p>${dxNutricionalPES}</p></div>
+                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; margin-top: 10px; page-break-inside: avoid;"><strong>Diagnóstico Nutricional (Manual):</strong><p>${dxNutricionalManual}</p></div>
+                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; margin-top: 10px; page-break-inside: avoid;"><strong>Plano Nutricional:</strong><p>${planoNutricional}</p></div>
+                                <div class="recommendations" style="background: #fdfdfd; min-height: 100px; margin-top: 10px; page-break-inside: avoid;"><strong>Recomendações/Conduta:</strong><p>${recomendacoes}</p></div>
+                            </div>
+                        </div></body></html>`;
+            }
+
+            // --- Funções do Dashboard ---
+            const modal = document.getElementById('dashboardModal');
+            document.getElementById('showDashboard').addEventListener('click', () => {
+                updateDashboard();
+                modal.style.display = 'flex';
+            });
+            document.getElementById('closeDashboard').addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) { modal.style.display = 'none'; }
+            });
+
+            function updateDashboard() {
+                const rows = Array.from(tableBody.querySelectorAll('.patient-row:not(#rowTemplate)'));
+                const total = rows.length;
+                let ageSum = 0, ageCount = 0, nrsRiskCount = 0, pgsgaRiskB = 0, pgsgaRiskC = 0;
+                const setorCounts = {}, comorbCounts = {};
+                const comorbCols = ['Comorb: DM', 'Comorb: Dislipidemia', 'Comorb: HAS', 'Comorb: AVC', 'Comorb: Cardiopata', 'Comorb: Nefropata'];
+
+                rows.forEach(row => {
+                    const idade = parseInt(row.querySelector('[data-calc-target="idade"]').value, 10);
+                    if (!isNaN(idade)) { ageSum += idade; ageCount++; }
+                    if (row.querySelector('[data-calc-target="nrsRisco"]').value.startsWith('Sim')) { nrsRiskCount++; }
+                    const pgsgaGlobal = row.querySelector('[data-col="ASG-PPP Avaliação Global (A/B/C)"]').value;
+                    if (pgsgaGlobal === 'B') pgsgaRiskB++;
+                    if (pgsgaGlobal === 'C') pgsgaRiskC++;
+                    const setor = row.querySelector('[data-col="Setor"]').value || 'Não preenchido';
+                    setorCounts[setor] = (setorCounts[setor] || 0) + 1;
+                    comorbCols.forEach(colName => {
+                        if (row.querySelector(`[data-col="${colName}"]`).value === 'Sim') {
+                            const comorb = colName.split(': ')[1];
+                            comorbCounts[comorb] = (comorbCounts[comorb] || 0) + 1;
+                        }
+                    });
+                });
+
+                document.getElementById('stat-total').textContent = total;
+                document.getElementById('stat-avg-age').textContent = (ageCount > 0) ? (ageSum / ageCount).toFixed(1) : 'N/A';
+                document.getElementById('stat-nrs-risk').textContent = `${nrsRiskCount} (${(total > 0 ? (nrsRiskCount / total) * 100 : 0).toFixed(0)}%)`;
+                document.getElementById('stat-pgsga-risk').textContent = `${pgsgaRiskB + pgsgaRiskC} (${(total > 0 ? ((pgsgaRiskB + pgsgaRiskC) / total) * 100 : 0).toFixed(0)}%)`;
+                const setorList = document.getElementById('stat-setor');
+                setorList.innerHTML = '';
+                Object.keys(setorCounts).sort((a,b) => setorCounts[b] - setorCounts[a]).forEach(key => {
+                    setorList.innerHTML += `<li>${key} <span>${setorCounts[key]}</span></li>`;
+                });
+                const comorbList = document.getElementById('stat-comorb');
+                comorbList.innerHTML = '';
+                Object.keys(comorbCounts).sort((a,b) => comorbCounts[b] - comorbCounts[a]).forEach(key => {
+                    comorbList.innerHTML += `<li>${key} <span>${comorbCounts[key]}</span></li>`;
+                });
+            }
+
+            // --- Inicialização da Página ---
+            loadFromLocalStorage();
+            
+            const firstRow = tableBody.querySelector('.patient-row:not(#rowTemplate)');
+            const firstSetor = firstRow ? firstRow.querySelector('[data-col="Setor"]').value : '';
+            updateAllHeaderVisibility(firstSetor);
+
+        });
+    </script></body></html>
