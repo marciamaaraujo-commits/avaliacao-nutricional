@@ -1063,7 +1063,7 @@
                 const imcVal = parseFloat(getCalcTarget('imc').value);
                 const genero = getEl('Gênero').value;
 
-                // *** INÍCIO DA CORREÇÃO v5.9: Lógica de ajuste da CB ***
+                // *** INÍCIO DA CORREÇÃO v6.0: Lógica de ajuste da CB ***
                 try {
                     const cbOriginal = parseFloat(getEl('CB (cm)').value);
                     const cbAjustadaTarget = getCalcTarget('cbAjustada');
@@ -1083,12 +1083,12 @@
                     }
                 } catch (e) { console.error("Erro CB Ajustada:", e); }
                 
-                // *** INÍCIO DA CORREÇÃO v5.9: Lógica de ajuste da CP ***
+                // *** INÍCIO DA CORREÇÃO v6.0: Lógica de ajuste da CP ***
                 try {
                     const cpOriginal = parseFloat(getEl('CP (cm)').value);
                     const cpAjustadaTarget = getCalcTarget('cpAjustada');
                     let ajuste = 0;
-                    if (!isNaN(cpOriginal) && !isNaN(imcVal)) { // Gênero não é mais necessário
+                    if (!isNaN(cpOriginal) && !isNaN(imcVal)) { // Gênero não é necessário para CP
                          if (imcVal >= 25 && imcVal < 30) {
                             ajuste = -3;
                         } else if (imcVal >= 30 && imcVal < 40) {
@@ -1102,7 +1102,7 @@
                         cpAjustadaTarget.value = '';
                     }
                 } catch (e) { console.error("Erro CP Ajustada:", e); }
-                // *** FIM DA CORREÇÃO v5.9 ***
+                // *** FIM DA CORREÇÃO v6.0 ***
                 
                 // --- CÁLCULO NRS-2002 ---
                 try {
