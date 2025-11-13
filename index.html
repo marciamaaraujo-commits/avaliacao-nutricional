@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.1 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.2 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -62,14 +62,11 @@
             width: 100%; overflow-x: auto; border: 1px solid #d1d5db;
             border-radius: 8px; margin-top: 20px; max-height: 70vh; overflow-y: auto;
         }
-        .symptom-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; min-width: 300px; }
-        .symptom-item { display: flex; justify-content: space-between; align-items: center; }
-        .symptom-item label { font-size: 13px; margin-right: 5px; }
-
+        
         /* Colunas condicionais */
         .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell { display: none; }
         
-        /* Grid para N.2 Doenças e Tratamentos */
+        /* Grid para Checkboxes */
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -580,11 +577,12 @@
                         </td>
                         <td class="asg-ppp-cell">
                             <select class="form-select" data-col="ASG-PPP: P.2 b) Ingestão (Atual)" data-calc="asg_ppp_p" style="white-space: normal; min-width: 280px;">
-                                <option value="0">Mesma comida (sólida) menor qtde (0)</option>
-                                <option value="1">Mesma comida (sólida) em pouca qtde (1)</option>
-                                <option value="2">Apenas alim. Liq. (2)</option>
-                                <option value="3">Muito pouca qtde de qq alim. (3)</option>
-                                <option value="4">Apenas alim. Por sonda ou veia (4)</option>
+                                <option value="1">A mesma comida (sólida) em menor quantidade (1)</option>
+                                <option value="2">A mesma comida (sólida) em pouca quantidade (2)</option>
+                                <option value="3">Apenas alimentos líquidos (3)</option>
+                                <option value="3">Apenas suplementos nutricionais (3)</option>
+                                <option value="4">Muito pouca quantidade de qualquer alimento (4)</option>
+                                <option value="0">Apenas alimentação por sonda ou pela veia (0)</option>
                             </select>
                         </td>
                         
@@ -640,21 +638,23 @@
                         </td>
                         
                         <td class="asg-ppp-cell">
-                            <div class="symptom-grid" style="min-width: 350px;">
-                                <div class="symptom-item"><label>Náusea</label><select class="form-select form-select-sm" data-col="Sintoma: Náusea"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Vômito</label><select class="form-select form-select-sm" data-col="Sintoma: Vômito"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Obstipação</label><select class="form-select form-select-sm" data-col="Sintoma: Obstipação"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Diarreia</label><select class="form-select form-select-sm" data-col="Sintoma: Diarreia"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Boca Seca</label><select class="form-select form-select-sm" data-col="Sintoma: Boca Seca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Saciedade</label><select class="form-select form-select-sm" data-col="Sintoma: Saciedade"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Gosto Alterado</label><select class="form-select form-select-sm" data-col="Sintoma: Gosto Alterado"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Dificuldade para engolir</label><select class="form-select form-select-sm" data-col="Sintoma: P. Engolir"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Cheiro Incomoda</label><select class="form-select form-select-sm" data-col="Sintoma: Cheiro Incomoda"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Cansaço</label><select class="form-select form-select-sm" data-col="Sintoma: Cansaço"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Feridas Boca</label><select class="form-select form-select-sm" data-col="Sintoma: Feridas Boca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Sem Apetite</label><select class="form-select form-select-sm" data-col="Sintoma: Sem Apetite"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item"><label>Dor</label><select class="form-select form-select-sm" data-col="Sintoma: Dor"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                                <div class="symptom-item" style="grid-column: 1 / -1;"><input type="text" class="form-input" data-col="ASG-PPP: Outros Sintomas" placeholder="Outros:"></div>
+                            <div class="checkbox-grid" style="min-width: 400px;">
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-1" data-col="Sintoma: Sem problemas" data-calc-points="0" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-1">Sem problemas (0)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-2" data-col="Sintoma: Sem apetite" data-calc-points="3" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-2">Sem apetite (3)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-3" data-col="Sintoma: Náusea" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-3">Náuseas (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-4" data-col="Sintoma: Vômito" data-calc-points="3" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-4">Vômitos (3)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-5" data-col="Sintoma: Obstipação" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-5">Obstipação (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-6" data-col="Sintoma: Diarreia" data-calc-points="3" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-6">Diarreia (3)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-7" data-col="Sintoma: Boca seca" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-7">Boca seca (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-8" data-col="Sintoma: Feridas na boca" data-calc-points="2" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-8">Feridas na boca (2)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-9" data-col="Sintoma: Me sinto satisfeito" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-9">Me sinto satisfeito rapidamente (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-10" data-col="Sintoma: Gosto estranho" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-10">Gosto estranho ou sem gosto (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-11" data-col="Sintoma: Cheiros incomodam" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-11">Os cheiros me incomodam (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-12" data-col="Sintoma: Dificuldade para engolir" data-calc-points="2" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-12">Dificuldade para engolir (2)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-13" data-col="Sintoma: Cansaço" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-13">Cansaço (fadiga) (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-14" data-col="Sintoma: Dor" data-calc-points="3" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-14">Dor (3)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-sintoma-1-15" data-col="Sintoma: Outros" data-calc-points="1" data-calc="asg_ppp_p3"><label for="cb-sintoma-1-15">Outros (1)</label></div>
+                                <input type="text" class="form-input score calculated" data-col="ASG-PPP: P.3 Score (Caixa 3)" data-calc-target="scoreP3" readonly>
                             </div>
                         </td>
                         <td class="asg-ppp-cell">
@@ -663,7 +663,6 @@
                                 <option value="1">Não totalmente normal, mas capaz de manter quase todas as atividades normais (1)</option>
                                 <option value="2">Sem disposição para a maioria das coisas, mas ficando na cama ou na cadeira menos da metade do dia (2)</option>
                                 <option value="3">Capaz de fazer pouca atividade e passando a maior parte do dia na cadeira ou na cama (3)</option>
-                                <option value="4">Praticamente acamado, raramente fora da cama (4)</option>
                             </select>
                         </td>
                         <td class="asg-ppp-cell"><input type="number" class="form-input score form-input-sm calculated" data-col="ASG-PPP Score (P1-P4)" data-calc-target="scoreP1_P4" readonly></td>
@@ -671,15 +670,13 @@
                         
                         <td class="asg-ppp-cell">
                             <div class="checkbox-grid">
-                                <div class="checkbox-item"><input type="checkbox" id="cb-cancer-1" data-col="Doença: Câncer" data-calc="asg_ppp_n2"><label for="cb-cancer-1">Câncer</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="cb-aids-1" data-col="Doença: AIDS" data-calc="asg_ppp_n2"><label for="cb-aids-1">AIDS</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="cb-caquexia-1" data-col="Doença: Caquexia (Card/Pulm)" data-calc="asg_ppp_n2"><label for="cb-caquexia-1">Caquexia (Card/Pulm)</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="cb-ulcera-1" data-col="Doença: Úlcera/Ferida" data-calc="asg_ppp_n2"><label for="cb-ulcera-1">Úlcera/Ferida</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="cb-trauma-1" data-col="Doença: Trauma" data-calc="asg_ppp_n2"><label for="cb-trauma-1">Trauma</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="cb-irc-1" data-col="Doença: IRC" data-calc="asg_ppp_n2"><label for="cb-irc-1">IRC</label></div>
-                                <div class="disease-item" style="grid-column: 1 / -1; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
-                                    <input type="text" class="form-input calculated" data-col="Doença: Idade >65 (Auto)" data-calc-target="idade65" readonly>
-                                </div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-1" data-col="Doença: Câncer" data-calc="asg_ppp_n2"><label for="cb-doenca-1-1">Câncer (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-2" data-col="Doença: AIDS" data-calc="asg_ppp_n2"><label for="cb-doenca-1-2">AIDS (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-3" data-col="Doença: Caquexia (Card/Pulm)" data-calc="asg_ppp_n2"><label for="cb-doenca-1-3">Caquexia (Card/Pulm) (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-4" data-col="Doença: Úlcera/Ferida" data-calc="asg_ppp_n2"><label for="cb-doenca-1-4">Úlcera/Ferida (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-5" data-col="Doença: Trauma" data-calc="asg_ppp_n2"><label for="cb-doenca-1-5">Trauma (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-6" data-col="Doença: IRC" data-calc="asg_ppp_n2"><label for="cb-doenca-1-6">IRC (1)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-doenca-1-7" data-col="Doença: Idade > 65 anos" data-calc="asg_ppp_n2"><label for="cb-doenca-1-7">Idade > 65 anos (1)</label></div>
                                 <input type="text" class="form-input calculated score" data-col="N.2: Doenças (Score)" data-calc-target="scoreN2" readonly>
                             </div>
                         </td>
@@ -687,17 +684,17 @@
                         <td class="asg-ppp-cell">
                             <select class="form-select" data-col="N.3: Febre" data-calc="asg_ppp_n3">
                                 <option value="0">Sem febre (0)</option>
-                                <option value="1">>37,2 e <38,3 (1)</option>
-                                <option value="2">≥38,3 e <38,9 (2)</option>
-                                <option value="3">≥38,9 (3)</option>
+                                <option value="1">37,2 e < 38,3 (1)</option>
+                                <option value="2">≥38,3 e < 38,9 (2)</option>
+                                <option value="3">≥ 38,9 (3)</option>
                             </select>
                         </td>
                         <td class="asg-ppp-cell">
                             <select class="form-select" data-col="N.3: Duração Febre" data-calc="asg_ppp_n3">
                                 <option value="0">Sem febre (0)</option>
-                                <option value="1"><72 horas (1)</option>
-                                <option value="2">72 horas (2)</option>
-                                <option value="3">>72 horas (3)</option>
+                                <option value="1">< 72 horas (1)</option>
+                                <option value="2">= 72 horas (2)</option>
+                                <option value="3">> 72 horas (3)</option>
                             </select>
                         </td>
                         <td class="asg-ppp-cell">
@@ -845,7 +842,7 @@
             </table>
         </div>
     </div>
-
+    
     <datalist id="comorb-list">
         <option value="Etilismo">
         <option value="Tabagismo">
@@ -939,7 +936,7 @@
                 } catch (e) { console.error("Erro Altura Estimada:", e); }
                 
                 pesoAtual = parseFloat(getEl('Peso Atual (kg)').value);
-                
+                const scoreP1a = parseInt(getEl('ASG-PPP: P.1 a) Peso (2 sem.)').value, 10) || 0;
                 let scoreN1 = 0;
 
                 if (!isNaN(pesoAtual) && pesoAtual > 0) {
@@ -950,51 +947,48 @@
                         const perda1mTarget = getCalcTarget('perda1m');
                         const perda6mTarget = getCalcTarget('perda6m');
                         
-                        const scoreN1_target = getCalcTarget('scoreN1');
-                        
-                        let perda1mValue = NaN;
-                        let perda6mValue = NaN;
-
+                        // --- Lógica de Display (Apenas % de campos específicos) ---
                         if (!isNaN(peso1M) && peso1M > 0) { 
-                            perda1mValue = (((peso1M - pesoAtual) / peso1M) * 100);
+                            const perda1mValue = (((peso1M - pesoAtual) / peso1M) * 100);
                             perda1mTarget.value = perda1mValue.toFixed(1) + '%'; 
-                        } 
-                        else { 
+                        } else { 
                             perda1mTarget.value = ''; 
                         }
-
                         if (!isNaN(peso6M) && peso6M > 0) { 
-                            perda6mValue = (((peso6M - pesoAtual) / peso6M) * 100);
+                            const perda6mValue = (((peso6M - pesoAtual) / peso6M) * 100);
                             perda6mTarget.value = perda6mValue.toFixed(1) + '%'; 
-                        } 
-                        else { 
+                        } else { 
                             perda6mTarget.value = ''; 
                         }
                         
-                        scoreN1 = 0;
-                        let base1M_score = !isNaN(peso1M) && peso1M > 0 ? peso1M : pesoHab;
-                        let base6M_score = !isNaN(peso6M) && peso6M > 0 ? peso6M : pesoHab;
+                        // --- Lógica de SCORE (Usa Peso Habitual como fallback) ---
+                        const scoreN1_target = getCalcTarget('scoreN1');
+                        let score1M = 0;
+                        let score6M = 0;
                         
-                        let usou1M = false;
+                        let base1M = !isNaN(peso1M) && peso1M > 0 ? peso1M : pesoHab;
+                        let base6M = !isNaN(peso6M) && peso6M > 0 ? peso6M : pesoHab;
 
-                        if (!isNaN(base1M_score) && base1M_score > 0) {
-                            const perda1mScoreValue = (((base1M_score - pesoAtual) / base1M_score) * 100);
-                            if (perda1mScoreValue >= 10) scoreN1 = 4;
-                            else if (perda1mScoreValue >= 5) scoreN1 = 3;
-                            else if (perda1mScoreValue >= 3) scoreN1 = 2;
-                            else if (perda1mScoreValue >= 2) scoreN1 = 1;
-                            usou1M = true;
-                        } 
-                        
-                        if (!usou1M && !isNaN(base6M_score) && base6M_score > 0) {
-                            const perda6mScoreValue = (((base6M_score - pesoAtual) / base6M_score) * 100);
-                            if (perda6mScoreValue >= 20) scoreN1 = 4;
-                            else if (perda6mScoreValue >= 10) scoreN1 = 3;
-                            else if (perda6mScoreValue >= 6) scoreN1 = 2;
-                            else if (perda6mScoreValue >= 2) scoreN1 = 1;
+                        if (!isNaN(base1M) && base1M > 0) {
+                            const perda1mScoreValue = (((base1M - pesoAtual) / base1M) * 100);
+                            if (perda1mScoreValue >= 10) score1M = 4;
+                            else if (perda1mScoreValue >= 5) score1M = 3;
+                            else if (perda1mScoreValue >= 3) score1M = 2;
+                            else if (perda1mScoreValue >= 2) score1M = 1;
                         }
                         
-                        if (isNaN(base1M_score) && isNaN(base6M_score)) {
+                        if (!isNaN(base6M) && base6M > 0) {
+                            const perda6mScoreValue = (((base6M - pesoAtual) / base6M) * 100);
+                            if (perda6mScoreValue >= 20) score6M = 4;
+                            else if (perda6mScoreValue >= 10) score6M = 3;
+                            else if (perda6mScoreValue >= 6) score6M = 2;
+                            else if (perda6mScoreValue >= 2) score6M = 1;
+                        }
+                        
+                        let scorePercentual = Math.max(score1M, score6M);
+                        scoreN1 = scorePercentual + scoreP1a; // *** CORREÇÃO v6.2: Adiciona ponto de 2 semanas ***
+                        
+                        if (isNaN(base1M) && isNaN(base6M)) {
                              scoreN1_target.value = '';
                         } else {
                              scoreN1_target.value = scoreN1;
@@ -1122,59 +1116,60 @@
                 // --- CÁLCULOS ASG-PPP ---
                 let scoreP_total = 0;
                 let scoreN2 = 0, scoreN3 = 0, scoreN4 = 0, scoreTotal_N = 0;
+                let scoreP3 = 0;
                 
                 try {
-                    const scoreP1a = parseInt(getEl('ASG-PPP: P.1 a) Peso (2 sem.)').value, 10) || 0;
+                    // *** CORREÇÃO v6.2: Cálculo de Sintomas (Caixa 3) ***
+                    scoreP3 = 0;
+                    row.querySelectorAll('[data-calc="asg_ppp_p3"]:checked').forEach(checkbox => {
+                        scoreP3 += parseInt(checkbox.dataset.calcPoints, 10) || 0;
+                    });
+                    getCalcTarget('scoreP3').value = scoreP3;
+
                     const scoreP2a = parseInt(getEl('ASG-PPP: P.2 a) Ingestão (Habitual)').value, 10) || 0;
                     const scoreP2b = parseInt(getEl('ASG-PPP: P.2 b) Ingestão (Atual)').value, 10) || 0;
                     const scoreP4 = parseInt(getEl('ASG-PPP: P.4: Atividades e função').value, 10) || 0;
-                    scoreP_total = scoreP1a + scoreP2a + scoreP2b + scoreP4;
+                    
+                    scoreP_total = scoreN1 + scoreP2a + scoreP2b + scoreP3 + scoreP4;
                     getCalcTarget('scoreP1_P4').value = scoreP_total;
                 } catch(e) { console.error("Erro Score P1-P4:", e); }
 
                 try {
-                    scoreN2 = 0; // Reseta o score N2
-                    const idade65Target = getCalcTarget('idade65');
-                    if (idade >= 65) { 
-                        scoreN2 += 1; 
-                        idade65Target.value = "Idade >65 anos (+1 pt)"; 
-                    } 
-                    else if (idade >= 0) { idade65Target.value = "Idade <65 anos (0 pt)"; }
-                    else { idade65Target.value = ''; }
-                    
-                    if (row.querySelector('[data-col="Doença: Câncer"]').checked) scoreN2 += 1;
-                    if (row.querySelector('[data-col="Doença: AIDS"]').checked) scoreN2 += 1;
-                    if (row.querySelector('[data-col="Doença: Caquexia (Card/Pulm)"]').checked) scoreN2 += 1;
-                    if (row.querySelector('[data-col="Doença: Úlcera/Ferida"]').checked) scoreN2 += 1;
-                    if (row.querySelector('[data-col="Doença: Trauma"]').checked) scoreN2 += 1;
-                    if (row.querySelector('[data-col="Doença: IRC"]').checked) scoreN2 += 1;
+                    // *** CORREÇÃO v6.2: Cálculo N.2 (Doenças) ***
+                    scoreN2 = 0;
+                    row.querySelectorAll('[data-calc="asg_ppp_n2"]:checked').forEach(checkbox => {
+                        scoreN2 += 1; // Cada item vale 1 ponto
+                    });
                     getCalcTarget('scoreN2').value = scoreN2;
                 } catch (e) { console.error("Erro Score N2:", e); }
                 
                 try {
+                    // *** CORREÇÃO v6.2: Cálculo N.3 (Demanda Metabólica) ***
                     const febreScore = parseInt(getEl('N.3: Febre').value, 10) || 0;
                     const duracaoFebreScore = parseInt(getEl('N.3: Duração Febre').value, 10) || 0;
                     const corticoideScore = parseInt(getEl('N.3: Corticosteroides').value, 10) || 0;
-                    scoreN3 = febreScore + duracaoFebreScore + corticoideScore;
+                    
+                    const scoreFebreTotal = Math.max(febreScore, duracaoFebreScore); // Pega o maior valor entre intensidade e duração
+                    scoreN3 = scoreFebreTotal + corticoideScore; // Soma com corticoides
                     getCalcTarget('scoreN3').value = scoreN3;
                 } catch(e) { console.error("Erro Score N3:", e); }
 
                 try {
                     scoreN4 = parseInt(getEl('N.4: Score Ex. Físico').value, 10) || 0;
                     
-                    scoreTotal_N = scoreN1 + scoreN2 + scoreN3 + scoreN4; 
+                    scoreTotal_N = scoreN2 + scoreN3 + scoreN4; 
                     getCalcTarget('scoreTotal').value = scoreTotal_N;
                     
                     const triagemTarget = getCalcTarget('triagem');
-                    if (scoreTotal_N <= 1) triagemTarget.value = '0–1: educação/monitorar';
-                    else if (scoreTotal_N <= 3) triagemTarget.value = '2–3: aconselhamento/controle de sintomas';
-                    else if (scoreTotal_N <= 8) triagemTarget.value = '4–8: intervenção com nutricionista';
+                    if (scoreP_total <= 1) triagemTarget.value = '0–1: educação/monitorar';
+                    else if (scoreP_total <= 3) triagemTarget.value = '2–3: aconselhamento/controle de sintomas';
+                    else if (scoreP_total <= 8) triagemTarget.value = '4–8: intervenção com nutricionista';
                     else triagemTarget.value = '≥9: necessidade crítica de controle de sintomas';
                 } catch (e) { console.error("Erro Score Total N:", e); }
                 
                 let globalVal_ASG = '';
                 try {
-                    getCalcTarget('fechamentoScore').value = scoreTotal_N; 
+                    getCalcTarget('fechamentoScore').value = scoreP_total; // O score final é o P1-P4
                     globalVal_ASG = getEl('ASG-PPP Avaliação Global (A/B/C)').value;
                     let globalText = '';
                     if (globalVal_ASG === 'A') globalText = 'A: Bem nutrido';
@@ -1183,7 +1178,7 @@
                     getCalcTarget('fechamentoGlobal').value = globalText;
                 } catch (e) { console.error("Erro Fechamento:", e); }
 
-                // --- INÍCIO DA CORREÇÃO v6.1: Lógica do PES ---
+                // --- Lógica do PES (Corrigida v6.1) ---
                 try {
                     const dxTarget = getCalcTarget('dxNutricional');
                     const classIMC = getCalcTarget('classIMC').value;
@@ -1215,11 +1210,11 @@
                     
                     if(aceitacao && parseInt(aceitacao, 10) < 75) dxStrings.push(`[S] Evidência: Baixa aceitação da dieta (${aceitacao}%)`);
                     
-                    if(scoreTotal_N > 0) dxStrings.push(`[S] Evidência: ASG-PPP Score N1-N4 = ${scoreTotal_N}`);
+                    if(scoreTotal_N > 0) dxStrings.push(`[S] Evidência: Scores Clínicos (N2-N4) = ${scoreTotal_N}`);
+                    if(scoreP3 > 0) dxStrings.push(`[S] Evidência: Sintomas presentes (Score P3 = ${scoreP3})`);
 
                     dxTarget.value = dxStrings.join('\n');
                 } catch(e) { console.error("Erro ao gerar DX:", e); }
-                // --- FIM DA CORREÇÃO v6.1 ---
 
                 saveToLocalStorage();
             }
@@ -1345,7 +1340,6 @@
                     saveToLocalStorage();
                 });
 
-                // NOVO v6.1: Listener para Edema "Outro"
                 row.querySelector('[data-col="N.4 Edema: Região"]').addEventListener('change', () => {
                     toggleEdemaOutro(row);
                     saveToLocalStorage();
@@ -1367,7 +1361,7 @@
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v6.1_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.2_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
@@ -1426,7 +1420,7 @@
                 toggleSectorCells(newRow, setor);
                 
                 toggleMedsField(newRow);
-                toggleEdemaOutro(newRow); // <-- ADICIONADO v6.1
+                toggleEdemaOutro(newRow); 
                 updateCalculations(newRow);
                 return newRow;
             }
@@ -1464,15 +1458,14 @@
                             cellValue = `"${cellElement.value.replace(/"/g, '""').replace(/\n/g, ' | ')}"`;
                         } else if (colName === "P.3: SINTOMAS") {
                             const symptoms = [];
-                            cell.querySelectorAll('[data-col^="Sintoma:"]').forEach(sel => {
-                                if(sel.value !== '0') { symptoms.push(`${sel.dataset.col.split(':')[1].trim()}: ${sel.value}`); }
+                            cell.querySelectorAll('[data-calc="asg_ppp_p3"]:checked').forEach(chk => {
+                                const label = row.querySelector(`label[for="${chk.id}"]`);
+                                if (label) symptoms.push(label.textContent);
                             });
-                            const outros = cell.querySelector('[data-col="ASG-PPP: Outros Sintomas"]').value;
-                            if (outros) symptoms.push(`Outros: ${outros}`);
                             cellValue = `"${symptoms.join('; ')}"`;
                         } else if (colName === "N.2: Doenças (Score)") {
                             const diseases = [];
-                            cell.querySelectorAll('[data-col^="Doença:"]:checked').forEach(chk => {
+                            cell.querySelectorAll('[data-calc="asg_ppp_n2"]:checked').forEach(chk => {
                                 const label = row.querySelector(`label[for="${chk.id}"]`);
                                 if (label) diseases.push(label.textContent);
                             });
@@ -1547,13 +1540,13 @@
 
                 let pgsgaHtml = '';
                 if (isAsgApplicable) {
-                    const pgsgaScore = getCalc('scoreTotal') || 'N/A';
+                    const pgsgaScore = getCalc('scoreP1_P4') || 'N/A'; // Mudado para Score do Paciente
                     const pgsgaGlobal = getVal('ASG-PPP Avaliação Global (A/B/C)');
                     const pgsgaGlobalText = pgsgaGlobal === 'A' ? 'A: Bem nutrido' : pgsgaGlobal === 'B' ? 'B: Desnutrição suspeita/moderada' : pgsgaGlobal === 'C' ? 'C: Desnutrição grave' : 'N/A';
                     const pgsgaTriagem = getCalc('triagem') || 'N/A';
                     
-                    pgsgaHtml = `<div class="info-item"><span class="info-label">ASG-PPP Score Numérico (N1-N4)</span><span class="info-value">${pgsgaScore}</span></div>
-                                 <div class="info-item"><span class="info-label">ASG-PPP Score (P1-P4)</span><span class="info-value">${getCalc('scoreP1_P4')}</span></div>
+                    pgsgaHtml = `<div class="info-item"><span class="info-label">ASG-PPP Score Paciente (Caixas 1-4)</span><span class="info-value">${pgsgaScore}</span></div>
+                                 <div class="info-item"><span class="info-label">ASG-PPP Score Clínico (B+C+D)</span><span class="info-value">${getCalc('scoreTotal')}</span></div>
                                  <div class="info-item"><span class="info-label">ASG-PPP Avaliação Global</span><span class="info-value">${pgsgaGlobalText}</span></div>
                                  <div class="info-item"><span class="info-label">Recomendação de Triagem</span><span class="info-value-sm">${pgsgaTriagem}</span></div>`;
                     if (pgsgaGlobal === 'B' || pgsgaGlobal === 'C') {
