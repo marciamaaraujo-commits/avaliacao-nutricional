@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.0 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.1 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -319,6 +319,7 @@
                         <th class="section-exam">N.4 Olhos (Conjuntiva/Achados/Córnea)</th>
                         <th class="section-exam">N.4 TEC (s)</th>
                         <th class="section-exam">N.4 Edema: Região</th>
+                        <th class="section-exam">N.4 Edema: Outra Região</th>
                         <th class="section-exam">N.4 Edema: Lado</th>
                         <th class="section-exam">N.4 Edema: Grau (Godet)</th>
                         <th class="section-exam asg-ppp-cell">N.4 Ex. Físico (ASG-PPP): Campos (0-3+)</th>
@@ -386,7 +387,7 @@
                         <td><input type="text" class="form-input" data-col="Leito"></td>
                         
                         <td class="dx-motivo-cell"> 
-                            <input type="text" class="form-input" data-col="Motivo da Internação" list="dx-list">
+                            <input type="text" class="form-input" data-col="Motivo da Internação">
                         </td>
                         <td class="dx-onco-cell"> 
                              <select class="form-select" data-col="Diagnóstico Médico (Onco)" style="white-space: normal;">
@@ -397,6 +398,7 @@
                                 <option value="CA Útero">CA Útero</option>
                                 <option value="CA Próstata">CA Próstata</option>
                                 <option value="CA Estômago">CA Estômago</option>
+                                <option value="CA de Esôfago">CA de Esôfago</option>
                                 <option value="CA Intestino">CA Intestino</option>
                                 <option value="CA Fígado">CA Fígado</option>
                                 <option value="CA Pele (melanona)">CA Pele (melanona)</option>
@@ -746,7 +748,7 @@
                             </select>
                         </td>
                         <td>
-                            <select class="form-select" data-col="N.4 Edema: Região">
+                            <select class="form-select" data-col="N.4 Edema: Região" data-calc="edema-outro">
                                 <option value="">Selecione...</option>
                                 <option value="Ausente">Ausente</option>
                                 <option value="MMII">MMII</option>
@@ -756,6 +758,7 @@
                                 <option value="Outro">Outro</option>
                             </select>
                         </td>
+                        <td><input type="text" class="form-input" data-col="N.4 Edema: Outra Região" disabled placeholder="Especifique..."></td>
                         <td>
                             <select class="form-select" data-col="N.4 Edema: Lado">
                                 <option value="">Selecione...</option>
@@ -843,13 +846,6 @@
         </div>
     </div>
 
-    <datalist id="dx-list">
-        <option value="Insuficiência Cardíaca (IC)">
-        <option value="Doença Renal Crônica (DRC)">
-        <option value="DPOC">
-        <option value="AVC">
-        <option value="Pneumonia">
-    </datalist>
     <datalist id="comorb-list">
         <option value="Etilismo">
         <option value="Tabagismo">
@@ -1063,7 +1059,6 @@
                 const imcVal = parseFloat(getCalcTarget('imc').value);
                 const genero = getEl('Gênero').value;
 
-                // *** INÍCIO DA CORREÇÃO v6.0: Lógica de ajuste da CB ***
                 try {
                     const cbOriginal = parseFloat(getEl('CB (cm)').value);
                     const cbAjustadaTarget = getCalcTarget('cbAjustada');
@@ -1076,19 +1071,17 @@
                         } else if (imcVal >= 40) {
                             ajuste = (genero === 'Feminino') ? -9 : -10;
                         }
-                        // Se BMI < 25, o ajuste permanece 0 (conforme guia "Aging/clinical populations")
                         cbAjustadaTarget.value = (cbOriginal + ajuste).toFixed(1);
                     } else {
                         cbAjustadaTarget.value = '';
                     }
                 } catch (e) { console.error("Erro CB Ajustada:", e); }
                 
-                // *** INÍCIO DA CORREÇÃO v6.0: Lógica de ajuste da CP ***
                 try {
                     const cpOriginal = parseFloat(getEl('CP (cm)').value);
                     const cpAjustadaTarget = getCalcTarget('cpAjustada');
                     let ajuste = 0;
-                    if (!isNaN(cpOriginal) && !isNaN(imcVal)) { // Gênero não é necessário para CP
+                    if (!isNaN(cpOriginal) && !isNaN(imcVal)) {
                          if (imcVal >= 25 && imcVal < 30) {
                             ajuste = -3;
                         } else if (imcVal >= 30 && imcVal < 40) {
@@ -1096,13 +1089,11 @@
                         } else if (imcVal >= 40) {
                             ajuste = -12;
                         }
-                        // Se BMI < 25, o ajuste permanece 0
                         cpAjustadaTarget.value = (cpOriginal + ajuste).toFixed(1);
                     } else {
                         cpAjustadaTarget.value = '';
                     }
                 } catch (e) { console.error("Erro CP Ajustada:", e); }
-                // *** FIM DA CORREÇÃO v6.0 ***
                 
                 // --- CÁLCULO NRS-2002 ---
                 try {
@@ -1192,26 +1183,22 @@
                     getCalcTarget('fechamentoGlobal').value = globalText;
                 } catch (e) { console.error("Erro Fechamento:", e); }
 
-                // --- NOVO v5.5: Cálculo do Diagnóstico Nutricional ---
+                // --- INÍCIO DA CORREÇÃO v6.1: Lógica do PES ---
                 try {
                     const dxTarget = getCalcTarget('dxNutricional');
-                    const nrsRisco = getEl('NRS: Risco Nutricional (≥3)').value;
                     const classIMC = getCalcTarget('classIMC').value;
-                    
                     const altDeglut = getEl('Altera. Mastig/Deglut.').value;
                     const ingestaoAtualEl = getEl('ASG-PPP: P.2 b) Ingestão (Atual)');
                     
                     let dxStrings = [];
                     
-                    // [P] Problema
+                    // [P] Problema (Baseado APENAS em ASG-PPP e IMC)
                     if (globalVal_ASG === 'C') dxStrings.push('[P] ASG-PPP: Desnutrição grave');
                     else if (globalVal_ASG === 'B') dxStrings.push('[P] ASG-PPP: Desnutrição moderada');
                     
-                    if (nrsRisco.startsWith('Sim')) dxStrings.push('[P] NRS: Risco Nutricional');
-                    
                     if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
 
-                    if (dxStrings.length === 0 && (nrsRisco || globalVal_ASG)) dxStrings.push('[P] Estado nutricional adequado');
+                    if (dxStrings.length === 0 && (globalVal_ASG || classIMC)) dxStrings.push('[P] Estado nutricional adequado');
 
                     // [E] Etiologia (Sugestões)
                     if (altDeglut && altDeglut !== 'Nenhuma') dxStrings.push(`[E] Etiologia Sugerida: ${altDeglut}`);
@@ -1232,7 +1219,7 @@
 
                     dxTarget.value = dxStrings.join('\n');
                 } catch(e) { console.error("Erro ao gerar DX:", e); }
-
+                // --- FIM DA CORREÇÃO v6.1 ---
 
                 saveToLocalStorage();
             }
@@ -1319,6 +1306,22 @@
                     medsInput.disabled = false;
                 }
             }
+            
+            // --- NOVO v6.1: Função para habilitar/desabilitar Edema "Outro" ---
+            function toggleEdemaOutro(row) {
+                const regiaoSelect = row.querySelector('[data-col="N.4 Edema: Região"]');
+                const outroInput = row.querySelector('[data-col="N.4 Edema: Outra Região"]');
+                if (!regiaoSelect || !outroInput) return;
+                
+                if (regiaoSelect.value === 'Outro') {
+                    outroInput.disabled = false;
+                } else {
+                    outroInput.disabled = true;
+                    if(document.activeElement !== regiaoSelect) {
+                        outroInput.value = '';
+                    }
+                }
+            }
 
             // --- Adicionar Event Listeners ---
             function addEventListeners(row) {
@@ -1342,14 +1345,19 @@
                     saveToLocalStorage();
                 });
 
+                // NOVO v6.1: Listener para Edema "Outro"
+                row.querySelector('[data-col="N.4 Edema: Região"]').addEventListener('change', () => {
+                    toggleEdemaOutro(row);
+                    saveToLocalStorage();
+                });
+
                 row.querySelectorAll('input, select, textarea').forEach(input => {
                      const eventType = (input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.type === 'checkbox') || (input.tagName === 'TEXTAREA')) ? 'input' : 'input';
-                     if (!input.dataset.calc && input.dataset.col !== 'Faz uso de Meds?') {
+                     if (!input.dataset.calc && input.dataset.col !== 'Faz uso de Meds?' && input.dataset.col !== 'N.4 Edema: Região') {
                         input.addEventListener(eventType, () => saveToLocalStorage());
                      }
                 });
                 
-                // --- NOVO v5.9: Listener para o botão de impressão da linha ---
                 row.querySelector('.print-row-btn').addEventListener('click', () => {
                     generateReportForRow(row);
                 });
@@ -1359,7 +1367,7 @@
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v5.9_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.1_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
@@ -1418,6 +1426,7 @@
                 toggleSectorCells(newRow, setor);
                 
                 toggleMedsField(newRow);
+                toggleEdemaOutro(newRow); // <-- ADICIONADO v6.1
                 updateCalculations(newRow);
                 return newRow;
             }
@@ -1488,7 +1497,7 @@
                 document.body.removeChild(link);
             });
 
-            // --- NOVO v5.9: Gerar Relatório A4 (para uma linha específica) ---
+            // --- Gerar Relatório A4 (para uma linha específica) ---
             function generateReportForRow(row) {
                 if (!row) {
                     alert('Erro: Linha do paciente não encontrada.');
