@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.3 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.4 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -883,6 +883,14 @@
                     <div class="stat-title">Contagem de Comorbidades</div>
                     <ul id="stat-comorb" class="stat-list"></ul>
                 </div>
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-title">Diagnóstico Médico / Motivo da Internação</div>
+                    <ul id="stat-dx" class="stat-list"></ul>
+                </div>
+                <div id="stat-suplemento-card" class="stat-card" style="grid-column: 1 / -1; display: none;">
+                    <div class="stat-title">Suplementação (Amb. Onco / Obs. Onco)</div>
+                    <ul id="stat-suplemento" class="stat-list"></ul>
+                </div>
             </div>
         </div>
     </div>
@@ -1394,7 +1402,7 @@
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v6.2_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.3_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
@@ -1467,28 +1475,52 @@
 
             // --- Funcionalidade: Exportar CSV ---
             document.getElementById('exportCSV').addEventListener('click', () => {
-                let csvContent = "data:text/csv;charset=utf-8-sig,";
-                const headers = Array.from(document.querySelectorAll('thead th'))
-                                    .map(th => `"${th.textContent.replace(/"/g, '""')}"`)
-                                    .join(',');
-                csvContent += headers + '\r\n';
+                // *** INÍCIO DA CORREÇÃO v6.3: Lógica do CSV ***
+                let csvHeaders = [];
+                document.querySelectorAll('thead th').forEach(th => {
+                    if (th.style.display !== 'none') {
+                        csvHeaders.push(`"${th.textContent.replace(/"/g, '""')}"`);
+                    }
+                });
+                let csvContent = "data:text/csv;charset=utf-8-sig," + csvHeaders.join(',') + '\r\n';
+
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
+                
                 rows.forEach(row => {
                     const rowData = [];
-                    document.querySelectorAll('thead th').forEach((th, index) => {
+                    const visibleCells = row.querySelectorAll('td');
+                    const allHeaders = document.querySelectorAll('thead th');
+
+                    allHeaders.forEach((th, index) => {
+                        const cell = visibleCells[index];
+                        if (!cell || cell.style.display === 'none') {
+                            return; // Pula colunas ocultas
+                        }
+
                         const colName = th.textContent;
-                        let cellValue = '""'; 
-                        const cell = row.querySelectorAll('td')[index];
-                        if (!cell) return;
-                        
+                        let cellValue = '""';
+
                         let cellElement = cell.querySelector('input:not([type="button"]):not([type="checkbox"]), select, textarea');
                         if (!cellElement) {
                              cellElement = cell.querySelector('[data-calc-target]');
                         }
                         
                         if (cellElement) {
-                            // Limpa quebras de linha para o CSV
                             cellValue = `"${cellElement.value.replace(/"/g, '""').replace(/\n/g, ' | ')}"`;
+                        } else if (colName === "Tratamentos realizados") {
+                            const treatments = [];
+                            cell.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
+                                const label = row.querySelector(`label[for="${chk.id}"]`);
+                                if (label) treatments.push(label.textContent);
+                            });
+                            cellValue = `"${treatments.join('; ')}"`;
+                        } else if (colName === "Tratamento Atual") {
+                            const treatments = [];
+                            cell.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
+                                const label = row.querySelector(`label[for="${chk.id}"]`);
+                                if (label) treatments.push(label.textContent);
+                            });
+                            cellValue = `"${treatments.join('; ')}"`;
                         } else if (colName === "P.3: SINTOMAS") {
                             const symptoms = [];
                             cell.querySelectorAll('[data-calc="asg_ppp_p3"]:checked').forEach(chk => {
@@ -1514,6 +1546,8 @@
                     });
                     csvContent += rowData.join(',') + '\r\n';
                 });
+                // *** FIM DA CORREÇÃO v6.3 ***
+
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement('a');
                 link.setAttribute('href', encodedUri);
@@ -1657,7 +1691,7 @@
                 const rows = Array.from(tableBody.querySelectorAll('.patient-row:not(#rowTemplate)'));
                 const total = rows.length;
                 let ageSum = 0, ageCount = 0, nrsRiskCount = 0, pgsgaRiskB = 0, pgsgaRiskC = 0;
-                const setorCounts = {}, comorbCounts = {};
+                const setorCounts = {}, comorbCounts = {}, dxCounts = {}, suplementoCounts = {}; // <-- ADICIONADO v6.4
                 const comorbCols = ['Comorb: DM', 'Comorb: Dislipidemia', 'Comorb: HAS', 'Comorb: AVC', 'Comorb: Cardiopata', 'Comorb: Nefropata'];
 
                 rows.forEach(row => {
@@ -1667,30 +1701,77 @@
                     const pgsgaGlobal = row.querySelector('[data-col="ASG-PPP Avaliação Global (A/B/C)"]').value;
                     if (pgsgaGlobal === 'B') pgsgaRiskB++;
                     if (pgsgaGlobal === 'C') pgsgaRiskC++;
+                    
                     const setor = row.querySelector('[data-col="Setor"]').value || 'Não preenchido';
                     setorCounts[setor] = (setorCounts[setor] || 0) + 1;
+                    
                     comorbCols.forEach(colName => {
                         if (row.querySelector(`[data-col="${colName}"]`).value === 'Sim') {
                             const comorb = colName.split(': ')[1];
                             comorbCounts[comorb] = (comorbCounts[comorb] || 0) + 1;
                         }
                     });
+
+                    // --- INÍCIO LÓGICA v6.4 ---
+                    const isAsgApplicable = (setor === 'Amb. Onco' || setor === 'Obs. Onco');
+                    
+                    // 1. Contar Diagnósticos
+                    let dxMedico = '';
+                    if (isAsgApplicable) {
+                        dxMedico = row.querySelector('[data-col="Diagnóstico Médico (Onco)"]').value;
+                    } else if (setor !== '') {
+                        dxMedico = row.querySelector('[data-col="Motivo da Internação"]').value;
+                    }
+                    if (dxMedico && dxMedico.trim() !== '') {
+                        dxCounts[dxMedico] = (dxCounts[dxMedico] || 0) + 1;
+                    }
+
+                    // 2. Contar Suplementação (Apenas Onco)
+                    if (isAsgApplicable) {
+                        const suplemento = row.querySelector('[data-col="Suplementação (ASG-PPP)"]').value;
+                        if (suplemento && suplemento.trim() !== '') {
+                            suplementoCounts[suplemento] = (suplementoCounts[suplemento] || 0) + 1;
+                        }
+                    }
+                    // --- FIM LÓGICA v6.4 ---
                 });
 
                 document.getElementById('stat-total').textContent = total;
                 document.getElementById('stat-avg-age').textContent = (ageCount > 0) ? (ageSum / ageCount).toFixed(1) : 'N/A';
                 document.getElementById('stat-nrs-risk').textContent = `${nrsRiskCount} (${(total > 0 ? (nrsRiskCount / total) * 100 : 0).toFixed(0)}%)`;
                 document.getElementById('stat-pgsga-risk').textContent = `${pgsgaRiskB + pgsgaRiskC} (${(total > 0 ? ((pgsgaRiskB + pgsgaRiskC) / total) * 100 : 0).toFixed(0)}%)`;
+                
                 const setorList = document.getElementById('stat-setor');
                 setorList.innerHTML = '';
                 Object.keys(setorCounts).sort((a,b) => setorCounts[b] - setorCounts[a]).forEach(key => {
                     setorList.innerHTML += `<li>${key} <span>${setorCounts[key]}</span></li>`;
                 });
+                
                 const comorbList = document.getElementById('stat-comorb');
                 comorbList.innerHTML = '';
                 Object.keys(comorbCounts).sort((a,b) => comorbCounts[b] - comorbCounts[a]).forEach(key => {
                     comorbList.innerHTML += `<li>${key} <span>${comorbCounts[key]}</span></li>`;
                 });
+
+                // --- INÍCIO RENDER v6.4 ---
+                const dxList = document.getElementById('stat-dx');
+                dxList.innerHTML = '';
+                Object.keys(dxCounts).sort((a,b) => dxCounts[b] - dxCounts[a]).forEach(key => {
+                    dxList.innerHTML += `<li>${key} <span>${dxCounts[key]}</span></li>`;
+                });
+
+                const suplementoList = document.getElementById('stat-suplemento');
+                const suplementoCard = document.getElementById('stat-suplemento-card');
+                suplementoList.innerHTML = '';
+                if (Object.keys(suplementoCounts).length > 0) {
+                    suplementoCard.style.display = 'block';
+                    Object.keys(suplementoCounts).sort((a,b) => suplementoCounts[b] - suplementoCounts[a]).forEach(key => {
+                        suplementoList.innerHTML += `<li>${key} <span>${suplementoCounts[key]}</span></li>`;
+                    });
+                } else {
+                    suplementoCard.style.display = 'none';
+                }
+                // --- FIM RENDER v6.4 ---
             }
 
             // --- Inicialização da Página ---
