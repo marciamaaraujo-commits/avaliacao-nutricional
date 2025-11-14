@@ -880,6 +880,10 @@
                     <ul id="stat-setor" class="stat-list"></ul>
                 </div>
                 <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-title">Pacientes por Gênero</div>
+                    <ul id="stat-genero" class="stat-list"></ul>
+                </div>
+                <div class="stat-card" style="grid-column: 1 / -1;">
                     <div class="stat-title">Contagem de Comorbidades</div>
                     <ul id="stat-comorb" class="stat-list"></ul>
                 </div>
@@ -1229,7 +1233,7 @@
                         if (nrsRisco.startsWith('Sim')) dxStrings.push('[P] NRS: Risco Nutricional');
                         
                         if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
-                        if (dxStrings.length === 0) { // Se não tiver risco E não tiver classif. IMC
+                        if (dxStrings.length === 0 && (nrsRisco || classIMC)) { 
                             dxStrings.push('[P] Estado nutricional adequado');
                         }
 
@@ -1691,7 +1695,7 @@
                 const rows = Array.from(tableBody.querySelectorAll('.patient-row:not(#rowTemplate)'));
                 const total = rows.length;
                 let ageSum = 0, ageCount = 0, nrsRiskCount = 0, pgsgaRiskB = 0, pgsgaRiskC = 0;
-                const setorCounts = {}, comorbCounts = {}, dxCounts = {}, suplementoCounts = {}; // <-- ADICIONADO v6.4
+                const setorCounts = {}, comorbCounts = {}, generoCounts = {}, dxCounts = {}, suplementoCounts = {}; // <-- ADICIONADO v6.4
                 const comorbCols = ['Comorb: DM', 'Comorb: Dislipidemia', 'Comorb: HAS', 'Comorb: AVC', 'Comorb: Cardiopata', 'Comorb: Nefropata'];
 
                 rows.forEach(row => {
@@ -1713,9 +1717,11 @@
                     });
 
                     // --- INÍCIO LÓGICA v6.4 ---
+                    const genero = row.querySelector('[data-col="Gênero"]').value || 'Não preenchido';
+                    generoCounts[genero] = (generoCounts[genero] || 0) + 1;
+
                     const isAsgApplicable = (setor === 'Amb. Onco' || setor === 'Obs. Onco');
                     
-                    // 1. Contar Diagnósticos
                     let dxMedico = '';
                     if (isAsgApplicable) {
                         dxMedico = row.querySelector('[data-col="Diagnóstico Médico (Onco)"]').value;
@@ -1726,7 +1732,6 @@
                         dxCounts[dxMedico] = (dxCounts[dxMedico] || 0) + 1;
                     }
 
-                    // 2. Contar Suplementação (Apenas Onco)
                     if (isAsgApplicable) {
                         const suplemento = row.querySelector('[data-col="Suplementação (ASG-PPP)"]').value;
                         if (suplemento && suplemento.trim() !== '') {
@@ -1754,6 +1759,12 @@
                 });
 
                 // --- INÍCIO RENDER v6.4 ---
+                const generoList = document.getElementById('stat-genero');
+                generoList.innerHTML = '';
+                Object.keys(generoCounts).sort((a,b) => generoCounts[b] - generoCounts[a]).forEach(key => {
+                    generoList.innerHTML += `<li>${key} <span>${generoCounts[key]}</span></li>`;
+                });
+
                 const dxList = document.getElementById('stat-dx');
                 dxList.innerHTML = '';
                 Object.keys(dxCounts).sort((a,b) => dxCounts[b] - dxCounts[a]).forEach(key => {
