@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.2 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.3 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -937,7 +937,7 @@
                 
                 pesoAtual = parseFloat(getEl('Peso Atual (kg)').value);
                 const scoreP1a = parseInt(getEl('ASG-PPP: P.1 a) Peso (2 sem.)').value, 10) || 0;
-                let scoreN1 = 0;
+                let scoreN1 = 0; // Este é o N.1 (Formulário 1)
 
                 if (!isNaN(pesoAtual) && pesoAtual > 0) {
                     try {
@@ -1178,43 +1178,76 @@
                     getCalcTarget('fechamentoGlobal').value = globalText;
                 } catch (e) { console.error("Erro Fechamento:", e); }
 
-                // --- Lógica do PES (Corrigida v6.1) ---
+                // --- INÍCIO DA CORREÇÃO v6.3: Lógica do PES (separada por setor) ---
                 try {
                     const dxTarget = getCalcTarget('dxNutricional');
                     const classIMC = getCalcTarget('classIMC').value;
-                    const altDeglut = getEl('Altera. Mastig/Deglut.').value;
-                    const ingestaoAtualEl = getEl('ASG-PPP: P.2 b) Ingestão (Atual)');
+                    const altDeglut = getEl('Altera. Mastig/Deglut.').value; // Universal
+                    const aceitacao = getEl('Aceitação Dieta Hosp. (%)').value; // Universal
                     
+                    const setor = getEl('Setor').value;
+                    const isAsgApplicable = (setor === 'Amb. Onco' || setor === 'Obs. Onco');
+
                     let dxStrings = [];
                     
-                    // [P] Problema (Baseado APENAS em ASG-PPP e IMC)
-                    if (globalVal_ASG === 'C') dxStrings.push('[P] ASG-PPP: Desnutrição grave');
-                    else if (globalVal_ASG === 'B') dxStrings.push('[P] ASG-PPP: Desnutrição moderada');
-                    
-                    if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
+                    // [P] Problema
+                    if (isAsgApplicable) {
+                        // ========== REGRA ONCO: Somente ASG-PPP ==========
+                        if (globalVal_ASG === 'C') dxStrings.push('[P] ASG-PPP: Desnutrição grave');
+                        else if (globalVal_ASG === 'B') dxStrings.push('[P] ASG-PPP: Desnutrição moderada');
+                        
+                        if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
+                        if (dxStrings.length === 0 && (globalVal_ASG || classIMC)) dxStrings.push('[P] Estado nutricional adequado');
 
-                    if (dxStrings.length === 0 && (globalVal_ASG || classIMC)) dxStrings.push('[P] Estado nutricional adequado');
+                        // [E] Etiologia (ASG-PPP)
+                        const ingestaoAtualEl = getEl('ASG-PPP: P.2 b) Ingestão (Atual)');
+                        if (altDeglut && altDeglut !== 'Nenhuma') dxStrings.push(`[E] Etiologia Sugerida: ${altDeglut}`);
+                        if (ingestaoAtualEl && ingestaoAtualEl.value && parseInt(ingestaoAtualEl.value, 10) > 0) dxStrings.push(`[E] Etiologia Sugerida: Baixa ingestão alimentar`);
+                        if (scoreN3 > 0) dxStrings.push(`[E] Etiologia Sugerida: Aumento da demanda metabólica`);
 
-                    // [E] Etiologia (Sugestões)
-                    if (altDeglut && altDeglut !== 'Nenhuma') dxStrings.push(`[E] Etiologia Sugerida: ${altDeglut}`);
-                    if (ingestaoAtualEl && ingestaoAtualEl.value && parseInt(ingestaoAtualEl.value, 10) > 0) dxStrings.push(`[E] Etiologia Sugerida: Baixa ingestão alimentar`);
-                    if (scoreN3 > 0) dxStrings.push(`[E] Etiologia Sugerida: Aumento da demanda metabólica`);
+                        // [S] Sinais (ASG-PPP)
+                        const perda1m = getCalcTarget('perda1m').value;
+                        const perda6m = getCalcTarget('perda6m').value;
+                        if(perda1m) dxStrings.push(`[S] Evidência: Perda de ${perda1m} em 1 mês`);
+                        else if(perda6m) dxStrings.push(`[S] Evidência: Perda de ${perda6m} em 6 meses`);
+                        if(aceitacao && parseInt(aceitacao, 10) < 75) dxStrings.push(`[S] Evidência: Baixa aceitação da dieta (${aceitacao}%)`);
+                        if(scoreTotal_N > 0) dxStrings.push(`[S] Evidência: Scores Clínicos (N2-N4) = ${scoreTotal_N}`);
+                        if(scoreP3 > 0) dxStrings.push(`[S] Evidência: Sintomas presentes (Score P3 = ${scoreP3})`);
 
-                    // [S] Sinais/Sintomas
-                    const perda1m = getCalcTarget('perda1m').value;
-                    const perda6m = getCalcTarget('perda6m').value;
-                    const aceitacao = getEl('Aceitação Dieta Hosp. (%)').value;
-                    
-                    if(perda1m) dxStrings.push(`[S] Evidência: Perda de ${perda1m} em 1 mês`);
-                    else if(perda6m) dxStrings.push(`[S] Evidência: Perda de ${perda6m} em 6 meses`);
-                    
-                    if(aceitacao && parseInt(aceitacao, 10) < 75) dxStrings.push(`[S] Evidência: Baixa aceitação da dieta (${aceitacao}%)`);
-                    
-                    if(scoreTotal_N > 0) dxStrings.push(`[S] Evidência: Scores Clínicos (N2-N4) = ${scoreTotal_N}`);
-                    if(scoreP3 > 0) dxStrings.push(`[S] Evidência: Sintomas presentes (Score P3 = ${scoreP3})`);
+                    } else {
+                        // ========== REGRA NÃO-ONCO: Somente NRS-2002 ==========
+                        const nrsRisco = getEl('NRS: Risco Nutricional (≥3)').value;
+                        
+                        if (nrsRisco.startsWith('Sim')) dxStrings.push('[P] NRS: Risco Nutricional');
+                        
+                        if (classIMC) dxStrings.push(`[P] IMC: ${classIMC}`);
+                        if (dxStrings.length === 0) { // Se não tiver risco E não tiver classif. IMC
+                            dxStrings.push('[P] Estado nutricional adequado');
+                        }
+
+                        // [E] Etiologia (NRS)
+                        const nrsEstado = getEl('NRS: Estado Nutricional').value;
+                        const nrsGravidade = getEl('NRS: Gravidade Doença').value;
+                        if (altDeglut && altDeglut !== 'Nenhuma') dxStrings.push(`[E] Etiologia Sugerida: ${altDeglut}`);
+                        if (nrsEstado.includes("ingestão 50-75%") || nrsEstado.includes("ingestão 20-60%") || nrsEstado.includes("ingestão 0-25%")) {
+                            dxStrings.push("[E] Etiologia Sugerida: Ingestão alimentar reduzida (NRS)");
+                        }
+                        if (nrsGravidade && !nrsGravidade.startsWith("0")) {
+                            dxStrings.push("[E] Etiologia Sugerida: Gravidade da doença (NRS)");
+                        }
+
+                        // [S] Sinais (NRS)
+                        if (nrsEstado.includes("Perda >5%/3m") || nrsEstado.includes("Perda >5%/2m") || nrsEstado.includes("Perda >5%/1m")) {
+                            dxStrings.push("[S] Evidência: Perda de peso recente (NRS)");
+                        }
+                        if(aceitacao && parseInt(aceitacao, 10) < 75) dxStrings.push(`[S] Evidência: Baixa aceitação da dieta (${aceitacao}%)`);
+                    }
 
                     dxTarget.value = dxStrings.join('\n');
-                } catch(e) { console.error("Erro ao gerar DX:", e); }
+                } catch(e) {
+                    console.error("Erro ao gerar DX:", e);
+                }
+                // --- FIM DA CORREÇÃO v6.3 ---
 
                 saveToLocalStorage();
             }
