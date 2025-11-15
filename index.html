@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.4 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.5 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -543,7 +543,7 @@
                         <td><input type="text" class="form-input" data-col="Tempo Via Enteral"></td>
                         <td>
                             <div class="checkbox-grid" style="min-width: 200px; grid-template-columns: repeat(2, 1fr);">
-                                <div class="checkbox-item"><input type="checkbox" id="cb-obs-apetite-1" data-col="Obs: Apetite"><label for="cb-obs-apetite-1">Apetite</label></div>
+                                <div class="checkbox-item non-onco-obs"><input type="checkbox" id="cb-obs-apetite-1" data-col="Obs: Apetite"><label for="cb-obs-apetite-1">Apetite</label></div>
                                 <div class="checkbox-item"><input type="checkbox" id="cb-obs-alergia-1" data-col="Obs: Alergia"><label for="cb-obs-alergia-1">Alergia</label></div>
                                 <div class="checkbox-item"><input type="checkbox" id="cb-obs-intolerancia-1" data-col="Obs: Intolerância"><label for="cb-obs-intolerancia-1">Intolerância</label></div>
                                 <div class="checkbox-item"><input type="checkbox" id="cb-obs-aversao-1" data-col="Obs: Aversão"><label for="cb-obs-aversao-1">Aversão</label></div>
@@ -1289,6 +1289,12 @@
                     cell.style.display = showNRS ? 'table-cell' : 'none';
                 });
                 
+                // --- INÍCIO CORREÇÃO v6.5: Ocultar Apetite para Onco ---
+                row.querySelectorAll('.non-onco-obs').forEach(item => {
+                    item.style.display = isAsgApplicable ? 'none' : 'flex';
+                });
+                // --- FIM CORREÇÃO v6.5 ---
+
                 // --- Lógica de visibilidade do Diagnóstico Médico ---
                 const dxOncoCell = row.querySelector('.dx-onco-cell');
                 const dxMotivoCell = row.querySelector('.dx-motivo-cell'); 
@@ -1412,7 +1418,7 @@
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v6.4_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.5_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
