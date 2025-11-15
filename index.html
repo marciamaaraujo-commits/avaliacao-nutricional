@@ -264,7 +264,7 @@
                         <th class="section-habits">H.I. Frequência</th>
                         <th class="section-habits">Via de Alimentação</th>
                         <th class="section-habits">Tempo Via Enteral</th>
-                        <th class="section-habits">Obs. Alimentação</th>
+                        <th class="section-habits">Observações Alimentares</th>
                         <th class="section-habits">Informações Extras</th>
                         <th class="section-habits">Cond. Funcional Anterior</th>
                         <th class="section-habits">Cond. Funcional Atual</th>
@@ -528,7 +528,6 @@
                                 <option value="A cada 2-3 dias">A cada 2-3 dias</option>
                                 <option value="A cada 1 semana">A cada 1 semana</option>
                                 <option value="Não está evacuando">Não está evacuando</option>
-                                <option value="Proced. clister">Proced. clister</option>
                             </select>
                         </td>
                         <td>
@@ -542,7 +541,14 @@
                             </select>
                         </td>
                         <td><input type="text" class="form-input" data-col="Tempo Via Enteral"></td>
-                        <td><input type="text" class="form-input" data-col="Obs. Alimentação"></td>
+                        <td>
+                            <div class="checkbox-grid" style="min-width: 200px; grid-template-columns: repeat(2, 1fr);">
+                                <div class="checkbox-item"><input type="checkbox" id="cb-obs-apetite-1" data-col="Obs: Apetite"><label for="cb-obs-apetite-1">Apetite</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-obs-alergia-1" data-col="Obs: Alergia"><label for="cb-obs-alergia-1">Alergia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-obs-intolerancia-1" data-col="Obs: Intolerância"><label for="cb-obs-intolerancia-1">Intolerância</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cb-obs-aversao-1" data-col="Obs: Aversão"><label for="cb-obs-aversao-1">Aversão</label></div>
+                            </div>
+                        </td>
                         <td><input type="text" class="form-input" data-col="Informações Extras"></td>
                         <td>
                             <select class="form-select" data-col="Cond. Funcional Anterior">
@@ -1406,7 +1412,7 @@
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v6.3_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.4_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
@@ -1479,7 +1485,6 @@
 
             // --- Funcionalidade: Exportar CSV ---
             document.getElementById('exportCSV').addEventListener('click', () => {
-                // *** INÍCIO DA CORREÇÃO v6.3: Lógica do CSV ***
                 let csvHeaders = [];
                 document.querySelectorAll('thead th').forEach(th => {
                     if (th.style.display !== 'none') {
@@ -1545,12 +1550,18 @@
                                 if(sel.value !== '0') { ef.push(`${sel.dataset.col.split(':')[1].trim()}: ${sel.value}`); }
                             });
                             cellValue = `"${ef.join('; ')}"`;
+                        } else if (colName === "Observações Alimentares") { // <-- ADICIONADO v6.5
+                            const obs = [];
+                            cell.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => {
+                                const label = row.querySelector(`label[for="${chk.id}"]`);
+                                if (label) obs.push(label.textContent);
+                            });
+                            cellValue = `"${obs.join('; ')}"`;
                         }
                         rowData.push(cellValue);
                     });
                     csvContent += rowData.join(',') + '\r\n';
                 });
-                // *** FIM DA CORREÇÃO v6.3 ***
 
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement('a');
