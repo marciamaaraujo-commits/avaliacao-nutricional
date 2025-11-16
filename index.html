@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="pt-BR"><head>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.5 (Local - Final)</title>
+    <title>Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP) - v6.6 (Local - Final)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
@@ -45,6 +47,7 @@
         th.section-anthro { background-color: #7e22ce; } /* Purple 700 */
         th.section-nrs { background-color: #0d9488; } /* Teal 600 */
         th.section-asg-ppp { background-color: #d97706; } /* Amber 600 - Cor Laranja */
+        th.section-onco-extra { background-color: #ec4899; } /* Pink 500 - NOVA COR */
         th.section-exam { background-color: #52525b; } /* Zinc 600 */
         th.section-final { background-color: #0284c7; } /* Sky 600 */
 
@@ -64,7 +67,7 @@
         }
         
         /* Colunas condicionais */
-        .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell { display: none; }
+        .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell, .onco-extra-cell { display: none; }
         
         /* Grid para Checkboxes */
         .checkbox-grid {
@@ -87,17 +90,21 @@
             white-space: normal;
         }
         
-        /* Botão de Impressão por Linha */
-        .print-row-btn {
+        /* Botões de Ação por Linha */
+        .print-row-btn, .delete-row-btn {
             padding: 4px 8px;
             font-size: 16px;
-            background-color: #0284c7;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
         }
+        .print-row-btn { background-color: #0284c7; }
         .print-row-btn:hover { background-color: #0369a1; }
+        
+        .delete-row-btn { background-color: #dc2626; margin-left: 5px; } /* NOVO */
+        .delete-row-btn:hover { background-color: #b91c1c; } /* NOVO */
+
 
         /* --- Estilos do Modal de Estatísticas --- */
         .modal-overlay {
@@ -132,11 +139,18 @@
                 margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; background-color: #fff;
             }
             .no-print { display: none !important; }
-            .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell { display: table-cell !important; } /* Mostrar tudo ao imprimir */
+            /* Mostrar tudo ao imprimir */
+            .asg-ppp-cell, .non-onco-cell, .nrs-cell, .dx-onco-cell, .dx-motivo-cell, .onco-extra-cell { display: table-cell !important; } 
+
             .print-container { 
                 width: 210mm; height: 297mm; margin: 0 auto; padding: 15mm; 
                 box-sizing: border-box; font-size: 11pt;
+                page-break-after: always; /* NOVO: Separa relatórios */
             }
+            .print-container:last-child {
+                page-break-after: avoid; /* NOVO: Não quebra depois do último */
+            }
+
             .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
             .print-header h1 { font-size: 18pt; margin: 0; }
             .print-header p { font-size: 12pt; margin: 5px 0 0 0; }
@@ -165,31 +179,33 @@
             .highlight-risk-pgsga h3 { color: #d97706; }
             .recommendations {
                 margin-top: 15px; border: 1px solid #777; padding: 10px;
-                min-height: 100px; background: #fdfdfd;
+                min-height: 100px; background: #fdfdfd; page-break-inside: avoid;
             }
-            /* Esconde o campo de texto do Dx no print, mostra o conteúdo */
-            .form-textarea[data-calc-target="dxNutricional"] { 
-                display: block; 
-                border: none; 
-                background: #fdfdfd !important; 
-                color: #000 !important; 
-                font-size: 11pt; 
-                height: auto;
-                min-height: 50px;
-                white-space: pre-wrap !important;
+            
+            /* Ajusta textareas para impressão */
+            .form-textarea[data-calc-target="dxNutricional"],
+            .form-textarea[data-col="Anotações/Considerações"], /* MUDOU AQUI */
+            .form-textarea[data-col="Escreva aqui o seu Diagnóstico Nutricional"],
+            .form-textarea[data-col="Plano Nutricional"] {
+                display: block; border: none; background: #fdfdfd !important;
+                color: #000 !important; font-size: 11pt; height: auto;
+                min-height: 50px; white-space: pre-wrap !important;
             }
-            .form-textarea[data-col="Plano Nutricional"], .form-textarea[data-col="Escreva aqui o seu Diagnóstico Nutricional"] {
-                display: block;
-                border: none;
-                background: #fdfdfd !important;
-                color: #000 !important;
-                font-size: 11pt;
-                height: auto;
-                min-height: 50px;
-                white-space: pre-wrap !important;
+
+            /* NOVO: Ajustes de impressão para o Modal de Estatísticas */
+            .modal-overlay {
+                position: static; background: #fff;
             }
+            .modal-content {
+                width: 100%; max-width: 100%; max-height: none; overflow-y: visible;
+                border: none; box-shadow: none; padding: 0;
+            }
+            .stat-list li { white-space: normal; }
+            .stat-list li span { white-space: normal; text-align: right; }
         }
-    </style></head><body class="p-6 md:p-10">
+    </style>
+</head>
+<body class="p-6 md:p-10">
     <div class="max-w-full mx-auto no-print">
         <h1 class="text-3xl font-bold text-gray-800">Ficha de Avaliação Nutricional Unificada (NRS + ASG-PPP)</h1>
         <p class="mt-2 text-gray-600">Preencha os campos abaixo. Os campos coloridos são calculados automaticamente.</p>
@@ -203,6 +219,9 @@
             </button>
             <button id="exportCSV" class="px-5 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                 Exportar para CSV
+            </button>
+            <button id="printAll" class="px-5 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+                🖨️ Imprimir Todos (A4)
             </button>
             <button id="showDashboard" class="px-5 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
                 📊 Ver Estatísticas
@@ -235,6 +254,7 @@
                         <th class="section-asg-ppp asg-ppp-cell">Seções (nº)</th>
                         <th class="section-asg-ppp asg-ppp-cell">Freq. (Trat.)</th>
                         <th class="section-asg-ppp asg-ppp-cell">Nº Sessão Atual</th>
+                        
                         <th class="section-clinic">Comorb: DM</th>
                         <th class="section-clinic">Comorb: Dislipidemia</th>
                         <th class="section-clinic">Comorb: HAS</th>
@@ -248,7 +268,11 @@
                         <th class="section-clinic">Fumante?</th>
                         <th class="section-clinic">Fumante (Tempo)</th>
                         <th class="section-clinic">Ex-fumante (Tempo)</th>
-                        <th class="section-clinic asg-ppp-cell">Suplementação (ASG-PPP)</th>
+                        
+                        <th class="section-onco-extra onco-extra-cell">Faz uso de Suplementação?</th>
+                        <th class="section-onco-extra onco-extra-cell">Suplemento: Marca/Tipo</th>
+                        <th class="section-onco-extra onco-extra-cell">Suplemento: Dosagem</th>
+                        <th class="section-onco-extra onco-extra-cell">Suplemento: Indicação</th>
 
                         <th class="section-habits">Dieta Atual</th>
                         <th class="section-habits">Altera. Mastig/Deglut.</th>
@@ -333,7 +357,8 @@
                         <th class="section-final asg-ppp-cell">ASG-PPP Score Total (N1-N4)</th>
                         <th class="section-final asg-ppp-cell">ASG-PPP Avaliação Global (A/B/C)</th>
                         <th class="section-final asg-ppp-cell">ASG-PPP Triagem (Recomendação)</th>
-                        <th class="section-final">Recomendações/Conduta</th>
+                        
+                        <th class="section-final">Anotações/Considerações</th>
                         
                         <th class="section-final">PES</th>
                         <th class="section-final">Escreva aqui o seu Diagnóstico Nutricional</th>
@@ -346,7 +371,12 @@
                 <tbody id="tableBody">
                     <tr id="rowTemplate" class="patient-row" style="display: none;">
                         <td class="sticky-col"><input type="text" class="form-input" data-col="Estagiário"></td>
-                        <td class="sticky-col sticky-col-action"><button class="print-row-btn no-print">🖨️ A4</button></td>
+                        
+                        <td class="sticky-col sticky-col-action">
+                            <button class="print-row-btn no-print">🖨️ A4</button>
+                            <button class="delete-row-btn no-print">🗑️</button>
+                        </td>
+                        
                         <td>
                             <select class="form-select" data-col="Setor" data-calc="setor">
                                 <option value="">Selecione...</option>
@@ -443,7 +473,8 @@
                         <td><select class="form-select form-select-sm" data-col="Comorb: AVC"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
                         <td><select class="form-select form-select-sm" data-col="Comorb: Cardiopata"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
                         <td><select class="form-select form-select-sm" data-col="Comorb: Nefropata"><option value="Não">Não</option><option value="Sim">Sim</option></select></td>
-                        <td><input type="text" class="form-input" data-col="Comorb: Outros" list="comorb-list"></td>
+                        
+                        <td><input type="text" class="form-input" data-col="Comorb: Outros"></td>
                         
                         <td>
                             <select class="form-select form-select-sm" data-col="Faz uso de Meds?">
@@ -463,7 +494,22 @@
                         </td>
                         <td><input type="text" class="form-input" data-col="Fumante (Tempo)"></td>
                         <td><input type="text" class="form-input" data-col="Ex-fumante (Tempo)"></td>
-                        <td class="asg-ppp-cell"><input type="text" class="form-input" data-col="Suplementação (ASG-PPP)" placeholder="Qual/posologia"></td>
+                        
+                        <td class="onco-extra-cell">
+                            <select class="form-select form-select-sm" data-col="Usa Suplemento?" data-calc="suplemento-toggle">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                            </select>
+                        </td>
+                        <td class="onco-extra-cell">
+                            <input type="text" class="form-input" data-col="Suplemento: Marca/Tipo" disabled>
+                        </td>
+                        <td class="onco-extra-cell">
+                            <input type="text" class="form-input" data-col="Suplemento: Dosagem" disabled>
+                        </td>
+                        <td class="onco-extra-cell">
+                            <input type="text" class="form-input" data-col="Suplemento: Indicação" disabled>
+                        </td>
 
                         <td>
                             <select class="form-select" data-col="Dieta Atual">
@@ -835,7 +881,8 @@
                             </select>
                         </td>
                         <td class="asg-ppp-cell"><input type="text" class="form-input calculated score-total" data-col="ASG-PPP Triagem (Recomendação)" data-calc-target="triagem" readonly></td>
-                        <td><textarea class="form-input form-textarea" data-col="Recomendações/Conduta" style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
+                        
+                        <td><textarea class="form-input form-textarea" data-col="Anotações/Considerações" style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
                         
                         <td><textarea class="form-input calculated form-textarea" data-col="PES" data-calc-target="dxNutricional" readonly rows="4" style="white-space: pre-wrap; min-width: 300px;"></textarea></td>
                         <td><textarea class="form-input form-textarea" data-col="Escreva aqui o seu Diagnóstico Nutricional" placeholder="Dx Nutricional (manual)..." style="white-space: pre-wrap; min-width: 300px;" rows="4"></textarea></td>
@@ -849,7 +896,7 @@
         </div>
     </div>
     
-    <datalist id="comorb-list">
+    <datalist id="comorb-list-disabled">
         <option value="Etilismo">
         <option value="Tabagismo">
         <option value="Hipotireoidismo">
@@ -862,7 +909,10 @@
         <div class="modal-content">
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-800">Estatísticas em Tempo Real</h2>
-                <button id="closeDashboard" class="text-2xl font-bold">&times;</button>
+                <div>
+                    <button id="printDashboard" class="px-3 py-1 text-sm font-medium text-white bg-sky-600 rounded-lg shadow-md hover:bg-sky-700 no-print" style="margin-right: 15px;">🖨️ Imprimir</button>
+                    <button id="closeDashboard" class="text-2xl font-bold no-print">&times;</button>
+                </div>
             </div>
             <div class="modal-grid">
                 <div class="stat-card">
@@ -898,8 +948,12 @@
                     <ul id="stat-dx" class="stat-list"></ul>
                 </div>
                 <div id="stat-suplemento-card" class="stat-card" style="grid-column: 1 / -1; display: none;">
-                    <div class="stat-title">Suplementação (Amb. Onco / Obs. Onco)</div>
+                    <div class="stat-title">Uso de Suplementação (Onco)</div>
                     <ul id="stat-suplemento" class="stat-list"></ul>
+                </div>
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-title">Anotações/Considerações (Resumo)</div>
+                    <ul id="stat-anotacoes" class="stat-list"></ul>
                 </div>
             </div>
         </div>
@@ -1282,6 +1336,10 @@
                 row.querySelectorAll('.asg-ppp-cell').forEach(cell => {
                     cell.style.display = isAsgApplicable ? 'table-cell' : 'none';
                 });
+                // NOVO: Mostrar/ocultar novas colunas onco
+                row.querySelectorAll('.onco-extra-cell').forEach(cell => {
+                    cell.style.display = isAsgApplicable ? 'table-cell' : 'none';
+                });
                 row.querySelectorAll('.non-onco-cell').forEach(cell => { // 'Descrição (Mastig/Deglut.)'
                     cell.style.display = isDescricaoSector ? 'table-cell' : 'none';
                 });
@@ -1319,6 +1377,10 @@
                 const showNRS = !isAsgApplicable;
                 
                 document.querySelectorAll('thead th.asg-ppp-cell').forEach(th => {
+                    th.style.display = isAsgApplicable ? 'table-cell' : 'none';
+                });
+                // NOVO: Mostrar/ocultar headers onco
+                document.querySelectorAll('thead th.onco-extra-cell').forEach(th => {
                     th.style.display = isAsgApplicable ? 'table-cell' : 'none';
                 });
                 document.querySelectorAll('thead th.non-onco-cell').forEach(th => {
@@ -1375,6 +1437,32 @@
                 }
             }
 
+            // --- NOVO: Função para habilitar/desabilitar campos de Suplemento ---
+            function toggleSuplementoFields(row) {
+                const usaSuplemento = row.querySelector('[data-col="Usa Suplemento?"]');
+                const marcaInput = row.querySelector('[data-col="Suplemento: Marca/Tipo"]');
+                const dosagemInput = row.querySelector('[data-col="Suplemento: Dosagem"]');
+                const indicacaoInput = row.querySelector('[data-col="Suplemento: Indicação"]');
+
+                if (!usaSuplemento || !marcaInput || !dosagemInput || !indicacaoInput) return;
+                
+                if (usaSuplemento.value === 'Sim') {
+                    marcaInput.disabled = false;
+                    dosagemInput.disabled = false;
+                    indicacaoInput.disabled = false;
+                } else {
+                    marcaInput.disabled = true;
+                    dosagemInput.disabled = true;
+                    indicacaoInput.disabled = true;
+                    
+                    if (document.activeElement !== usaSuplemento) {
+                        marcaInput.value = '';
+                        dosagemInput.value = '';
+                        indicacaoInput.value = '';
+                    }
+                }
+            }
+
             // --- Adicionar Event Listeners ---
             function addEventListeners(row) {
                 row.querySelectorAll('[data-calc]').forEach(input => {
@@ -1402,10 +1490,16 @@
                     saveToLocalStorage();
                 });
 
+                // NOVO: Listener para toggle de suplemento
+                row.querySelector('[data-calc="suplemento-toggle"]').addEventListener('change', () => {
+                    toggleSuplementoFields(row);
+                    saveToLocalStorage(); // Save the change
+                });
+
                 row.querySelectorAll('input, select, textarea').forEach(input => {
                      const eventType = (input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.type === 'checkbox') || (input.tagName === 'TEXTAREA')) ? 'input' : 'input';
                      if (!input.dataset.calc && input.dataset.col !== 'Faz uso de Meds?' && input.dataset.col !== 'N.4 Edema: Região') {
-                        input.addEventListener(eventType, () => saveToLocalStorage());
+                         input.addEventListener(eventType, () => saveToLocalStorage());
                      }
                 });
                 
@@ -1413,12 +1507,24 @@
                     generateReportForRow(row);
                 });
 
+                // NOVO: Listener para Excluir
+                row.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    if (confirm('Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.')) {
+                        row.remove(); // Remove a linha do DOM
+                        saveToLocalStorage(); // Atualiza o local storage
+                        // Atualiza headers se for a última linha
+                        const firstRow = tableBody.querySelector('.patient-row:not(#rowTemplate)');
+                        const firstSetor = firstRow ? firstRow.querySelector('[data-col="Setor"]').value : '';
+                        updateAllHeaderVisibility(firstSetor);
+                    }
+                });
+
                 updateCalculations(row); 
             }
 
 
             // --- Funções de Local Storage (Salvar Rascunho) ---
-            const STORAGE_KEY = 'nutriFormData_v6.5_local'; // Chave atualizada
+            const STORAGE_KEY = 'nutriFormData_v6.6_local'; // Chave atualizada
 
             function saveToLocalStorage() {
                 const rows = tableBody.querySelectorAll('.patient-row:not(#rowTemplate)');
@@ -1478,6 +1584,7 @@
                 
                 toggleMedsField(newRow);
                 toggleEdemaOutro(newRow); 
+                toggleSuplementoFields(newRow); // NOVO: Chama o toggle de suplemento
                 updateCalculations(newRow);
                 return newRow;
             }
@@ -1578,20 +1685,10 @@
                 document.body.removeChild(link);
             });
 
-            // --- Gerar Relatório A4 (para uma linha específica) ---
-            function generateReportForRow(row) {
-                if (!row) {
-                    alert('Erro: Linha do paciente não encontrada.');
-                    return;
-                }
-                const reportHTML = createReportHTML(row);
-                const reportWindow = window.open('', '_blank');
-                reportWindow.document.write(reportHTML);
-                reportWindow.document.close();
-                setTimeout(() => { reportWindow.print(); }, 500);
-            }
+            // --- INÍCIO REFAATORAÇÃO: Gerar Relatório A4 ---
             
-            function createReportHTML(row) {
+            // Etapa 1: Lógica do Relatório (retorna apenas o HTML do container)
+            function getReportContainerHTML(row) {
                 const getVal = (col) => { const el = row.querySelector(`[data-col="${col}"]`); return el ? el.value : 'N/A'; };
                 const getCalc = (target) => { const el = row.querySelector(`[data-calc-target="${target}"]`); return el ? el.value : 'N/A'; };
                 
@@ -1634,9 +1731,9 @@
                     const pgsgaTriagem = getCalc('triagem') || 'N/A';
                     
                     pgsgaHtml = `<div class="info-item"><span class="info-label">ASG-PPP Score Paciente (Caixas 1-4)</span><span class="info-value">${pgsgaScore}</span></div>
-                                 <div class="info-item"><span class="info-label">ASG-PPP Score Clínico (B+C+D)</span><span class="info-value">${getCalc('scoreTotal')}</span></div>
-                                 <div class="info-item"><span class="info-label">ASG-PPP Avaliação Global</span><span class="info-value">${pgsgaGlobalText}</span></div>
-                                 <div class="info-item"><span class="info-label">Recomendação de Triagem</span><span class="info-value-sm">${pgsgaTriagem}</span></div>`;
+                                   <div class="info-item"><span class="info-label">ASG-PPP Score Clínico (B+C+D)</span><span class="info-value">${getCalc('scoreTotal')}</span></div>
+                                   <div class="info-item"><span class="info-label">ASG-PPP Avaliação Global</span><span class="info-value">${pgsgaGlobalText}</span></div>
+                                   <div class="info-item"><span class="info-label">Recomendação de Triagem</span><span class="info-value-sm">${pgsgaTriagem}</span></div>`;
                     if (pgsgaGlobal === 'B' || pgsgaGlobal === 'C') {
                         pgsgaHtml = `<div class="highlight-risk-pgsga"><h3>AVALIAÇÃO ASG-PPP</h3>${pgsgaHtml}</div>`;
                     }
@@ -1645,17 +1742,16 @@
                 const metaKcal = getCalc('metaCalorica') || 'N/A';
                 const metaPtn = getCalc('metaProteica') || 'N/A';
                 const metaHidrica = getCalc('metaHidrica') || 'N/A';
-                const recomendacoes = getVal('Recomendações/Conduta').replace(/\n/g, '<br>') || 'Nenhuma observação.';
+                
+                // MUDOU AQUI
+                const anotacoes = getVal('Anotações/Considerações').replace(/\n/g, '<br>') || 'Nenhuma observação.';
                 const obsGerais = getVal('Informações Extras').replace(/\n/g, '<br>') || 'Nenhuma.';
                 
                 const dxNutricionalPES = getCalc('dxNutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
                 const dxNutricionalManual = getVal('Escreva aqui o seu Diagnóstico Nutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
                 const planoNutricional = getVal('Plano Nutricional').replace(/\n/g, '<br>') || 'Nenhuma observação.';
 
-                const styles = Array.from(document.querySelectorAll('style:not([src])')).map(style => style.innerHTML).join('');
-
-                return `<html><head><title>Relatório Nutricional - ${nome}</title><style>${styles}</style></head>
-                        <body><div class="print-container">
+                return `<div class="print-container">
                             <div class="print-header"><h1>Relatório de Avaliação Nutricional</h1><p>Paciente: ${nome}</p></div>
                             <div class="print-section"><h2>Identificação do Paciente</h2>
                                 <div class="grid-3-col">
@@ -1687,13 +1783,63 @@
                             </div>
                             <div class="print-section"><h2>Observações, Diagnóstico e Plano</h2>
                                 <div class="info-item"><span class="info-label">Informações Extras (Paciente)</span><span class="info-value-sm">${obsGerais}</span></div>
-                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; page-break-inside: avoid;"><strong>Diagnóstico Nutricional (PES - Automático):</strong><p>${dxNutricionalPES}</p></div>
-                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; margin-top: 10px; page-break-inside: avoid;"><strong>Diagnóstico Nutricional (Manual):</strong><p>${dxNutricionalManual}</p></div>
-                                <div class="recommendations" style="background: #fdfdfd; min-height: 50px; margin-top: 10px; page-break-inside: avoid;"><strong>Plano Nutricional:</strong><p>${planoNutricional}</p></div>
-                                <div class="recommendations" style="background: #fdfdfd; min-height: 100px; margin-top: 10px; page-break-inside: avoid;"><strong>Recomendações/Conduta:</strong><p>${recomendacoes}</p></div>
+                                <div class="recommendations"><strong>Diagnóstico Nutricional (PES - Automático):</strong><p>${dxNutricionalPES}</p></div>
+                                <div class="recommendations"><strong>Diagnóstico Nutricional (Manual):</strong><p>${dxNutricionalManual}</p></div>
+                                <div class="recommendations"><strong>Plano Nutricional:</strong><p>${planoNutricional}</p></div>
+                                <div class="recommendations"><strong>Anotações/Considerações:</strong><p>${anotacoes}</p></div>
                             </div>
-                        </div></body></html>`;
+                        </div>`;
             }
+
+            // Etapa 2: Função que envolve o container com o HTML completo (para impressão única)
+            function generateFullReportHTML(row) {
+                const reportContainer = getReportContainerHTML(row);
+                const styles = Array.from(document.querySelectorAll('style:not([src])')).map(style => style.innerHTML).join('');
+                const nome = row.querySelector('[data-col="Nome/Iniciais"]').value || 'Paciente';
+                
+                return `<html><head><title>Relatório Nutricional - ${nome}</title><style>${styles}</style></head>
+                        <body>${reportContainer}</body></html>`;
+            }
+
+            // Etapa 3: Handler do botão de impressão da linha (usa a função da Etapa 2)
+            function generateReportForRow(row) {
+                if (!row) {
+                    alert('Erro: Linha do paciente não encontrada.');
+                    return;
+                }
+                const reportHTML = generateFullReportHTML(row);
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(reportHTML);
+                reportWindow.document.close();
+                setTimeout(() => { reportWindow.print(); }, 500);
+            }
+
+            // NOVO: Etapa 4: Handler do botão "Imprimir Todos"
+            document.getElementById('printAll').addEventListener('click', () => {
+                const rows = document.querySelectorAll('.patient-row:not(#rowTemplate)');
+                if (rows.length === 0) {
+                    alert('Não há pacientes para imprimir.');
+                    return;
+                }
+
+                let combinedContainers = '';
+                rows.forEach(row => {
+                    combinedContainers += getReportContainerHTML(row); // Concatena apenas os containers
+                });
+
+                const styles = Array.from(document.querySelectorAll('style:not([src])')).map(style => style.innerHTML).join('');
+                
+                // Envolve todos os containers concatenados em um único HTML
+                const reportHTML = `<html><head><title>Relatório de Pacientes</title><style>${styles}</style></head>
+                                    <body>${combinedContainers}</body></html>`;
+
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(reportHTML);
+                reportWindow.document.close();
+                setTimeout(() => { reportWindow.print(); }, 500);
+            });
+            // --- FIM REFAATORAÇÃO: Gerar Relatório A4 ---
+
 
             // --- Funções do Dashboard ---
             const modal = document.getElementById('dashboardModal');
@@ -1708,11 +1854,20 @@
                 if (e.target === modal) { modal.style.display = 'none'; }
             });
 
+            // NOVO: Listener para imprimir o dashboard
+            document.getElementById('printDashboard').addEventListener('click', () => {
+                window.print();
+            });
+
             function updateDashboard() {
                 const rows = Array.from(tableBody.querySelectorAll('.patient-row:not(#rowTemplate)'));
                 const total = rows.length;
                 let ageSum = 0, ageCount = 0, nrsRiskCount = 0, pgsgaRiskB = 0, pgsgaRiskC = 0;
-                const setorCounts = {}, comorbCounts = {}, generoCounts = {}, dxCounts = {}, suplementoCounts = {}; // <-- ADICIONADO v6.4
+                
+                // MUDOU AQUI: Atualizado para novos campos
+                const setorCounts = {}, comorbCounts = {}, generoCounts = {}, dxCounts = {}, 
+                      suplementoCounts = {}, marcaCounts = {}, anotacoesCounts = {};
+                
                 const comorbCols = ['Comorb: DM', 'Comorb: Dislipidemia', 'Comorb: HAS', 'Comorb: AVC', 'Comorb: Cardiopata', 'Comorb: Nefropata'];
 
                 rows.forEach(row => {
@@ -1733,7 +1888,6 @@
                         }
                     });
 
-                    // --- INÍCIO LÓGICA v6.4 ---
                     const genero = row.querySelector('[data-col="Gênero"]').value || 'Não preenchido';
                     generoCounts[genero] = (generoCounts[genero] || 0) + 1;
 
@@ -1749,13 +1903,25 @@
                         dxCounts[dxMedico] = (dxCounts[dxMedico] || 0) + 1;
                     }
 
+                    // MUDOU AQUI: Lógica de stats de suplemento
                     if (isAsgApplicable) {
-                        const suplemento = row.querySelector('[data-col="Suplementação (ASG-PPP)"]').value;
-                        if (suplemento && suplemento.trim() !== '') {
-                            suplementoCounts[suplemento] = (suplementoCounts[suplemento] || 0) + 1;
+                        const usaSuplemento = row.querySelector('[data-col="Usa Suplemento?"]').value;
+                        suplementoCounts[usaSuplemento] = (suplementoCounts[usaSuplemento] || 0) + 1;
+
+                        if (usaSuplemento === 'Sim') {
+                            const marca = row.querySelector('[data-col="Suplemento: Marca/Tipo"]').value.trim();
+                            if (marca && marca !== '') {
+                                marcaCounts[marca] = (marcaCounts[marca] || 0) + 1;
+                            }
                         }
                     }
-                    // --- FIM LÓGICA v6.4 ---
+                    
+                    // NOVO: Lógica de stats de anotações
+                    const anotacao = row.querySelector('[data-col="Anotações/Considerações"]').value.trim();
+                    if (anotacao && anotacao !== '') {
+                        const nome = row.querySelector('[data-col="Nome/Iniciais"]').value.trim() || 'Paciente s/ nome';
+                        anotacoesCounts[nome] = anotacao;
+                    }
                 });
 
                 document.getElementById('stat-total').textContent = total;
@@ -1775,7 +1941,6 @@
                     comorbList.innerHTML += `<li>${key} <span>${comorbCounts[key]}</span></li>`;
                 });
 
-                // --- INÍCIO RENDER v6.4 ---
                 const generoList = document.getElementById('stat-genero');
                 generoList.innerHTML = '';
                 Object.keys(generoCounts).sort((a,b) => generoCounts[b] - generoCounts[a]).forEach(key => {
@@ -1788,18 +1953,39 @@
                     dxList.innerHTML += `<li>${key} <span>${dxCounts[key]}</span></li>`;
                 });
 
+                // MUDOU AQUI: Renderização de stats de suplemento
                 const suplementoList = document.getElementById('stat-suplemento');
                 const suplementoCard = document.getElementById('stat-suplemento-card');
                 suplementoList.innerHTML = '';
                 if (Object.keys(suplementoCounts).length > 0) {
                     suplementoCard.style.display = 'block';
                     Object.keys(suplementoCounts).sort((a,b) => suplementoCounts[b] - suplementoCounts[a]).forEach(key => {
-                        suplementoList.innerHTML += `<li>${key} <span>${suplementoCounts[key]}</span></li>`;
+                        suplementoList.innerHTML += `<li>Usa Suplemento: ${key} <span>${suplementoCounts[key]}</span></li>`;
                     });
+                    
+                    if (Object.keys(marcaCounts).length > 0) {
+                         suplementoList.innerHTML += `<li style="margin-top: 10px; font-weight: bold; justify-content: start;">Marcas/Tipos:</li>`;
+                         Object.keys(marcaCounts).sort((a,b) => marcaCounts[b] - marcaCounts[a]).forEach(key => {
+                            suplementoList.innerHTML += `<li style="padding-left: 15px;">${key} <span>${marcaCounts[key]}</span></li>`;
+                        });
+                    }
                 } else {
                     suplementoCard.style.display = 'none';
                 }
-                // --- FIM RENDER v6.4 ---
+
+                // NOVO: Renderização de stats de anotações
+                const anotacoesList = document.getElementById('stat-anotacoes');
+                anotacoesList.innerHTML = '';
+                if (Object.keys(anotacoesCounts).length > 0) {
+                    Object.keys(anotacoesCounts).forEach(key => {
+                        anotacoesList.innerHTML += `<li style="white-space: normal; display: block; margin-bottom: 5px;">
+                            <strong style="color: #374151;">${key}:</strong>
+                            <span style="color: #6b7280; display: block; padding-left: 10px; font-weight: normal;">${anotacoesCounts[key]}</span>
+                        </li>`;
+                    });
+                } else {
+                    anotacoesList.innerHTML = `<li>Nenhuma anotação preenchida.</li>`;
+                }
             }
 
             // --- Inicialização da Página ---
@@ -1810,4 +1996,6 @@
             updateAllHeaderVisibility(firstSetor);
 
         });
-    </script></body></html>
+    </script>
+</body>
+</html>
